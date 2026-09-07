@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="iris">
+  <schema id="org.gnome.shell.extensions.iris"
+          path="/org/gnome/shell/extensions/iris/">
+    <key name="show-indicator" type="b">
+      <default>true</default>
+      <summary>Show a top bar indicator</summary>
+      <description>Display Iris status and quick controls in the GNOME top bar.</description>
+    </key>
+    <key name="show-on-lock-screen" type="b">
+      <default>true</default>
+      <summary>Show face-unlock hint on the lock screen</summary>
+      <description>
+        Display the scanning indicator on the unlock dialog. This is presentation only:
+        whether face unlock actually works is decided by the PAM stack, not by this extension.
+      </description>
+    </key>
+    <key name="show-on-login-screen" type="b">
+      <default>true</default>
+      <summary>Show face-login hint at GDM</summary>
+      <description>Display the scanning indicator on the GDM greeter.</description>
+    </key>
+    <key name="hint-timeout" type="i">
+      <default>10</default>
+      <range min="3" max="60"/>
+      <summary>Seconds to show the scanning hint</summary>
+      <description>
+        How long the scanning animation runs before it settles into a neutral state.
+        Match this to auth.timeout in /etc/iris/config.toml.
+      </description>
+    </key>
+    <key name="success-hold-ms" type="i">
+      <default>800</default>
+      <range min="0" max="3000"/>
+      <summary>Hold the unlock briefly on success</summary>
+      <description>
+        Milliseconds to keep the lock screen up after face authentication succeeds,
+        so the success animation is visible. Without it the shell dismisses the
+        screen the instant PAM returns and the checkmark is never seen. Applies
+        only when nothing was typed; a typed password always unlocks immediately.
+        0 disables the hold.
+      </description>
+    </key>
+  </schema>
+</schemalist>

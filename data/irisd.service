@@ -1,0 +1,66 @@
+[Unit]
+Description=Iris face authentication daemon
+Documentation=file:///usr/share/doc/iris/README.md
+# The daemon only needs the camera and local disk; no network, no D-Bus dependency.
+After=systemd-udev-settle.service
+Wants=systemd-udev-settle.service
+
+[Service]
+Type=notify
+NotifyAccess=main
+ExecStart=/usr/sbin/irisd
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+
+# --- filesystem layout -------------------------------------------------------
+# RuntimeDirectory gives us /run/irisd owned root:root 0700; the socket inside it
+# is created 0600. StateDirectory gives us /var/lib/iris 0700 for the encrypted
+# templates and the master key.
+RuntimeDirectory=irisd
+RuntimeDirectoryMode=0700
+StateDirectory=iris
+StateDirectoryMode=0700
+UMask=0077
+
+# --- hardening ---------------------------------------------------------------
+# Runs as root because it must read root-only templates and be reachable by PAM
+# modules running in privileged contexts. Everything root does not need is dropped.
+NoNewPrivileges=yes
+ProtectSystem=strict
+# The daemon owns config_set (the CLI and the settings GUI both delegate to it),
+# so /etc/iris must be writable here or every settings change fails with EROFS
+# under ProtectSystem=strict.
+ReadWritePaths=/var/lib/iris /etc/iris
+ProtectHome=yes
+PrivateTmp=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+RestrictAddressFamilies=AF_UNIX
+LockPersonality=yes
+MemoryDenyWriteExecute=no
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+
+# Only the capabilities needed to read root-owned state and the video node.
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH CAP_DAC_OVERRIDE
+AmbientCapabilities=
+
+# NOTE: deliberately NO PrivateDevices=yes. That would hide /dev/video*, and the
+# whole daemon exists to read the camera. The video group is added so the setup
+# still works if the unit is ever adapted to run as a non-root user.
+DeviceAllow=char-video4linux rw
+DeviceAllow=/dev/tpmrm0 rw
+SupplementaryGroups=video
+
+[Install]
+WantedBy=multi-user.target

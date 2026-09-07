@@ -1,0 +1,8 @@
+Name: Iris face authentication
+Default: no
+Priority: 900
+Auth-Type: Primary
+Auth:
+	[success=end default=ignore]	pam_iris.so
+Auth-Initial:
+	[success=end default=ignore]	pam_iris.so

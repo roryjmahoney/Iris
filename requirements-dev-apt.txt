@@ -1,0 +1,12 @@
+# Additional Ubuntu packages for tests and repository documentation assets.
+# Runtime packages remain in requirements-apt.txt.
+
+python3-cairo
+python3-pil
+
+# GNOME Shell JavaScript syntax and exported-resource contract checks
+nodejs
+node-acorn
+
+# PTY-backed installer rollback tests
+bsdutils

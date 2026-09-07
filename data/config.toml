@@ -1,0 +1,60 @@
+# Iris face authentication — system configuration
+#
+# Installed to /etc/iris/config.toml. Owned by root, mode 0644.
+# The daemon re-reads this on SIGHUP; `iris config set <key> <value>` edits it safely.
+# A malformed file is NOT fatal: iris.config falls back to built-in defaults and logs,
+# so a bad edit here can never lock you out.
+
+[camera]
+# Verified on this machine: /dev/video2 is the IR sensor (GREY 8-bit, 640x360, 15fps).
+# /dev/video0 is the RGB webcam. /dev/video1 and /dev/video3 are METADATA nodes — the
+# daemon refuses them, but do not point this at them.
+# IR is strongly preferred: it works in darkness and a phone/monitor replay emits no 850nm.
+device = "/dev/video2"
+width = 640
+height = 360
+
+# The IR illuminator on this camera STROBES: alternating frames are dark (mean ~1) and
+# lit (mean ~55-62). With ir_mode on, the daemon discards frames dimmer than
+# min_frame_brightness so recognition only ever sees illuminated frames. Turning this
+# off on an IR camera will make authentication fail roughly half the time.
+ir_mode = true
+min_frame_brightness = 20.0
+
+[recognition]
+# Cosine similarity required to call it a match. Upstream SFace default is 0.363.
+# Measured on this hardware, genuine same-person pairs scored min 0.621 / p5 0.738,
+# so 0.363 has a wide safety margin. See docs/CALIBRATION.md — 0.5 is a defensible
+# hardening step if you want tighter impostor rejection:
+#   sudo iris config set recognition.threshold 0.5
+threshold = 0.363
+
+# YuNet detection confidence floor before a region is treated as a face.
+detect_score = 0.7
+
+model_dir = "/usr/share/iris/models"
+
+# Consecutive matching frames required before success. This is the real defence
+# against a single lucky frame; at ~15fps with half the frames dark, 3 costs ~0.4s.
+required_matches = 3
+
+# Hard cap on frames examined in one attempt, so a bad camera cannot spin forever.
+max_frames = 120
+
+[auth]
+# Master switch. false => the daemon answers every auth request with reason "disabled"
+# and PAM falls through to password. The fastest way to turn Iris off without touching PAM.
+enabled = true
+
+# Wall-clock budget for one attempt, in seconds. Past this the answer is "timeout"
+# and you get the password prompt.
+timeout = 8.0
+
+# Rate limiting: after max_failures failures, refuse for lockout_seconds.
+max_failures = 5
+lockout_seconds = 60
+
+[liveness]
+# IR-native spoof resistance. See docs/SECURITY.md for what this does and does not stop.
+enabled = true
+min_variance = 12.0

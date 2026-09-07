@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+#
+# Metadata only. Iris is installed by install.sh rather than a Python build
+# backend because GTK, PAM, systemd, polkit, and OpenCV are apt-managed system
+# dependencies. See requirements-apt.txt and docs/INSTALLATION.md.
+
+[project]
+name = "iris"
+version = "1.0.0"
+description = "Local infrared face authentication for Ubuntu, GNOME, and Wayland"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "AGPL-3.0-only"
+license-files = ["LICENSE"]
+keywords = ["authentication", "biometrics", "gnome", "infrared", "pam"]
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Security",
+]
+
+[tool.iris]
+installation = "apt-first"
+installer = "install.sh"
+system-dependencies = "requirements-apt.txt"
+development-system-dependencies = "requirements-dev-apt.txt"
+test-command = "./tests/run.sh"
+package-mode = false

@@ -1,0 +1,43 @@
+#!/bin/sh
+# ============================================================================
+#  iris — development launcher for the Iris CLI, run from a source checkout
+# ============================================================================
+#
+#  Installed systems do not use this file: install.sh (or the manual procedure
+#  in README.md) copies src/iris/cli.py to /usr/bin/iris and the package to
+#  /usr/lib/python3/dist-packages/iris, and that is what the GUI, pkexec and
+#  the daemon all invoke.
+#
+#  This exists because iris.gui.backend.iris_binary() looks for
+#  <repo>/bin/iris as its last resort, so that the GTK settings panel can drive
+#  a real CLI when the tree has not been installed yet.  Without it, running the
+#  app from a checkout fails with "the Iris helper is not installed" the moment
+#  the user touches anything privileged.
+#
+#  It must be an absolute-path-resolving shell script rather than a symlink:
+#  pkexec refuses to run a target it cannot resolve to a regular file, and it
+#  scrubs the environment, so PYTHONPATH cannot be relied on to survive.  The
+#  path is therefore computed here and cli.py's own bootstrap puts src/ on
+#  sys.path.
+# ============================================================================
+
+set -eu
+
+# readlink -f resolves symlinks in the path to this script, so the repository
+# is found correctly even when bin/iris is reached through one.
+self=$(readlink -f "$0")
+repo=$(dirname "$(dirname "$self")")
+cli="$repo/src/iris/cli.py"
+
+if [ ! -f "$cli" ]; then
+    echo "iris: cannot find $cli (is this a complete checkout?)" >&2
+    exit 1
+fi
+
+# PYTHONPATH is set as well as relying on cli.py's bootstrap: the bootstrap
+# only helps this process, while `iris doctor` and friends spawn nothing but
+# still benefit from an unambiguous import root.
+PYTHONPATH="$repo/src${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH
+
+exec /usr/bin/python3 "$cli" "$@"

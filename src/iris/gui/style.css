@@ -1,0 +1,481 @@
+/*
+ * Iris design system.
+ *
+ * Loaded once, at GTK_STYLE_PROVIDER_PRIORITY_APPLICATION, so it layers over
+ * libadwaita rather than replacing it: standard controls keep their platform
+ * behaviour and only the Iris-specific surfaces are restyled.
+ *
+ * Principles
+ * ----------
+ * - Whitespace is the layout.  Spacing does the work that borders and boxes do
+ *   in a denser design, so there is exactly one divider style and no panels.
+ * - One accent, taken from the user's system accent colour.  Everything else
+ *   is a neutral or a semantic state, which is what keeps a security tool
+ *   looking calm instead of decorated.
+ * - Depth is a hint, not an effect.  Shadows are wide, low-opacity and never
+ *   coloured; there are no bevels, gloss, insets or textures anywhere.
+ * - Motion is under 200 ms for anything CSS drives.  Longer, drawn animations
+ *   live in widgets.py where they can be timed against the frame clock.
+ *
+ * Light and dark
+ * --------------
+ * Every colour is a custom property defined on :root, and the dark theme
+ * redefines the same names under `:root.iris-dark`.  The class is toggled by
+ * app.py from Adw.StyleManager::dark, which is authoritative for libadwaita --
+ * it accounts for the desktop's colour-scheme portal, the user's override and
+ * the forced-light/forced-dark cases, none of which a plain media query would
+ * see consistently.  Custom properties inherit, so defining them once on the
+ * root reaches every widget in the window, dialogs included.
+ *
+ * Requires GTK >= 4.16 for `:root`, custom properties and var().
+ */
+
+/* -------------------------------------------------------------------------
+ * Tokens - light
+ * ---------------------------------------------------------------------- */
+
+:root {
+  /* Surfaces, from furthest back to closest to the reader. */
+  --iris-bg:            #fbfbfd;
+  --iris-bg-elevated:   #ffffff;
+  --iris-surface:       #ffffff;
+  --iris-surface-sunk:  #f2f2f6;
+
+  /* Text.  --iris-fg-dim clears 6:1 on --iris-bg; --iris-fg-faint is for
+     non-essential text only and never carries meaning on its own. */
+  --iris-fg:            #1c1c1e;
+  --iris-fg-dim:        rgba(0, 0, 0, 0.62);
+  --iris-fg-faint:      rgba(0, 0, 0, 0.42);
+
+  --iris-line:          rgba(0, 0, 0, 0.09);
+  --iris-line-strong:   rgba(0, 0, 0, 0.16);
+
+  /* Semantic states.  Chosen for >= 4.5:1 against --iris-bg. */
+  --iris-success:       #1b8b4f;
+  --iris-success-soft:  rgba(27, 139, 79, 0.12);
+  --iris-warning:       #9a6207;
+  --iris-warning-soft:  rgba(154, 98, 7, 0.12);
+  --iris-danger:        #bd2e2e;
+  --iris-danger-soft:   rgba(189, 46, 46, 0.11);
+
+  /* Fills tinted by the accent, for selected rows and the hero mark. */
+  --iris-accent-soft:   alpha(@accent_color, 0.12);
+  --iris-accent-line:   alpha(@accent_color, 0.34);
+
+  /* The face dial (docs/ANIMATION.md, "Colour").  Pinned literals rather than
+     @accent_color, and the only place in this file that departs from the "one
+     accent, the user's" rule: the GNOME Shell extension draws the same dial on
+     the lock screen and cannot reach libadwaita's accent, and a dial that is
+     blue in the greeter and purple in the wizard is two products, not one.
+
+     GTK4 has no API for reading a custom property back out of a widget, so
+     widgets.py carries the same five values as _DIAL_* constants and draws
+     from those.  These declarations are the shared, greppable definition and
+     reach anything styled in CSS; change one file and change the other. */
+  --iris-tick-idle:     rgba(0, 0, 0, 0.24);
+  --iris-tick-active:   rgb(0, 122, 255);
+  --iris-tick-muted:    rgba(0, 0, 0, 0.20);
+  --iris-dial-accent:   rgb(0, 122, 255);
+  --iris-dial-success:  rgb(40, 167, 69);
+
+  --iris-shadow-soft:   0 1px 2px rgba(0, 0, 0, 0.05),
+                        0 8px 24px rgba(0, 0, 0, 0.07);
+  --iris-shadow-lift:   0 2px 4px rgba(0, 0, 0, 0.06),
+                        0 16px 40px rgba(0, 0, 0, 0.10);
+
+  /* Type scale: a 1.22 ratio, rounded to whole pixels so glyphs stay crisp.
+     Sized for a 2560x1600 panel at arm's length; GTK scales all of it with
+     the desktop text-scaling factor. */
+  --iris-text-display:  34px;
+  --iris-text-title1:   26px;
+  --iris-text-title2:   20px;
+  --iris-text-heading:  16px;
+  --iris-text-body:     15px;
+  --iris-text-caption:  13px;
+
+  /* Spacing scale.  Only these values appear below. */
+  --iris-space-1: 4px;
+  --iris-space-2: 8px;
+  --iris-space-3: 12px;
+  --iris-space-4: 16px;
+  --iris-space-5: 24px;
+  --iris-space-6: 32px;
+  --iris-space-7: 48px;
+  --iris-space-8: 64px;
+
+  /* Geometry.  Continuous, generous corners; nothing is square except rules. */
+  --iris-radius-sm:   10px;
+  --iris-radius-md:   16px;
+  --iris-radius-lg:   22px;
+  --iris-radius-pill: 999px;
+}
+
+/* -------------------------------------------------------------------------
+ * Tokens - dark
+ * ---------------------------------------------------------------------- */
+
+:root.iris-dark {
+  --iris-bg:            #131316;
+  --iris-bg-elevated:   #1c1c20;
+  --iris-surface:       #1c1c20;
+  --iris-surface-sunk:  #0e0e11;
+
+  --iris-fg:            #f2f2f4;
+  --iris-fg-dim:        rgba(255, 255, 255, 0.68);
+  --iris-fg-faint:      rgba(255, 255, 255, 0.46);
+
+  --iris-line:          rgba(255, 255, 255, 0.11);
+  --iris-line-strong:   rgba(255, 255, 255, 0.20);
+
+  --iris-success:       #5acc83;
+  --iris-success-soft:  rgba(90, 204, 131, 0.16);
+  --iris-warning:       #e0a33a;
+  --iris-warning-soft:  rgba(224, 163, 58, 0.16);
+  --iris-danger:        #f27676;
+  --iris-danger-soft:   rgba(242, 118, 118, 0.15);
+
+  --iris-accent-soft:   alpha(@accent_color, 0.20);
+  --iris-accent-line:   alpha(@accent_color, 0.46);
+
+  /* The dial's dark column.  This is the variant the lock screen always uses,
+     and the one ANIMATION.md's opacity arithmetic is written against. */
+  --iris-tick-idle:     rgba(255, 255, 255, 0.28);
+  --iris-tick-active:   rgb(120, 190, 255);
+  --iris-tick-muted:    rgba(255, 255, 255, 0.22);
+  --iris-dial-accent:   rgb(120, 190, 255);
+  --iris-dial-success:  rgb(52, 199, 89);
+
+  /* Shadows carry almost no weight on a dark ground; depth comes from the
+     surface being lighter than the background instead. */
+  --iris-shadow-soft:   0 1px 2px rgba(0, 0, 0, 0.5),
+                        0 8px 24px rgba(0, 0, 0, 0.36);
+  --iris-shadow-lift:   0 2px 6px rgba(0, 0, 0, 0.55),
+                        0 18px 48px rgba(0, 0, 0, 0.45);
+}
+
+/* -------------------------------------------------------------------------
+ * Window chrome
+ * ---------------------------------------------------------------------- */
+
+.iris-window,
+.iris-window > * {
+  background-color: var(--iris-bg);
+}
+
+.iris-window headerbar {
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  min-height: 46px;
+}
+
+/* The header only earns a rule once content has scrolled under it. */
+.iris-window headerbar.iris-scrolled {
+  border-bottom: 1px solid var(--iris-line);
+}
+
+.iris-window headerbar windowtitle label.title {
+  font-size: var(--iris-text-heading);
+  font-weight: 600;
+}
+
+/* -------------------------------------------------------------------------
+ * Type scale
+ * ---------------------------------------------------------------------- */
+
+.iris-display {
+  font-size: var(--iris-text-display);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--iris-fg);
+}
+
+.iris-title-1 {
+  font-size: var(--iris-text-title1);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--iris-fg);
+}
+
+.iris-title-2 {
+  font-size: var(--iris-text-title2);
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--iris-fg);
+}
+
+.iris-heading {
+  font-size: var(--iris-text-heading);
+  font-weight: 600;
+  color: var(--iris-fg);
+}
+
+.iris-body {
+  font-size: var(--iris-text-body);
+  font-weight: 400;
+  color: var(--iris-fg);
+}
+
+.iris-lede {
+  font-size: var(--iris-text-heading);
+  font-weight: 400;
+  color: var(--iris-fg-dim);
+}
+
+.iris-caption {
+  font-size: var(--iris-text-caption);
+  color: var(--iris-fg-dim);
+}
+
+.iris-dim   { color: var(--iris-fg-dim); }
+.iris-faint { color: var(--iris-fg-faint); }
+
+.iris-numeric {
+  /* Tabular figures so a live counter does not jitter as digits change. */
+  font-feature-settings: "tnum" 1;
+}
+
+.iris-mono {
+  font-family: monospace;
+  font-size: var(--iris-text-caption);
+}
+
+/* -------------------------------------------------------------------------
+ * Layout helpers
+ * ---------------------------------------------------------------------- */
+
+.iris-page {
+  padding-top: var(--iris-space-7);
+  padding-bottom: var(--iris-space-8);
+  padding-left: var(--iris-space-5);
+  padding-right: var(--iris-space-5);
+}
+
+.iris-section {
+  margin-top: var(--iris-space-6);
+}
+
+.iris-rule {
+  background-color: var(--iris-line);
+  min-height: 1px;
+}
+
+/* -------------------------------------------------------------------------
+ * Surfaces
+ * ---------------------------------------------------------------------- */
+
+.iris-card {
+  background-color: var(--iris-surface);
+  border-radius: var(--iris-radius-md);
+  box-shadow: var(--iris-shadow-soft);
+  padding: var(--iris-space-5);
+}
+
+.iris-card.iris-lifted {
+  box-shadow: var(--iris-shadow-lift);
+}
+
+/* A quiet container for supporting information: no shadow, so it reads as
+   part of the page rather than as another object on top of it. */
+.iris-well {
+  background-color: var(--iris-surface-sunk);
+  border-radius: var(--iris-radius-md);
+  padding: var(--iris-space-4);
+}
+
+/* libadwaita's own list rows, softened to match the cards above. */
+.iris-window .boxed-list {
+  border-radius: var(--iris-radius-md);
+  box-shadow: var(--iris-shadow-soft);
+}
+
+/* Iris's own dial is the welcome mark. No generic camera glyph, gradient
+   medallion or decorative shadow: motion and geometry carry the identity. */
+.iris-hero-dial {
+  min-width: 132px;
+  min-height: 132px;
+}
+
+/* -------------------------------------------------------------------------
+ * Status pill
+ * ---------------------------------------------------------------------- */
+
+.iris-pill {
+  border-radius: var(--iris-radius-pill);
+  padding: var(--iris-space-1) var(--iris-space-3);
+  font-size: var(--iris-text-caption);
+  font-weight: 600;
+  background-color: var(--iris-surface-sunk);
+  color: var(--iris-fg-dim);
+}
+
+.iris-pill.iris-ok      { background-color: var(--iris-success-soft); color: var(--iris-success); }
+.iris-pill.iris-warn    { background-color: var(--iris-warning-soft); color: var(--iris-warning); }
+.iris-pill.iris-danger  { background-color: var(--iris-danger-soft);  color: var(--iris-danger); }
+
+.iris-pill image {
+  -gtk-icon-size: 14px;
+}
+
+/* -------------------------------------------------------------------------
+ * Buttons
+ * ---------------------------------------------------------------------- */
+
+.iris-window button {
+  transition: background-color 160ms ease-out,
+              box-shadow 160ms ease-out,
+              opacity 160ms ease-out;
+}
+
+/* The one primary action on a screen. Pill-shaped, generous target. */
+button.iris-cta {
+  border-radius: var(--iris-radius-pill);
+  padding: var(--iris-space-3) var(--iris-space-6);
+  min-height: 26px;
+  font-size: var(--iris-text-heading);
+  font-weight: 600;
+}
+
+button.iris-cta.suggested-action {
+  box-shadow: var(--iris-shadow-soft);
+}
+
+/* Secondary actions: text-weight, no chrome until pointed at. */
+button.iris-quiet {
+  border-radius: var(--iris-radius-pill);
+  padding: var(--iris-space-2) var(--iris-space-4);
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  color: var(--iris-fg-dim);
+  font-weight: 500;
+}
+
+button.iris-quiet:hover {
+  background-color: var(--iris-surface-sunk);
+  color: var(--iris-fg);
+}
+
+button.iris-link {
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border: none;
+  color: @accent_color;
+  font-weight: 500;
+}
+
+/* -------------------------------------------------------------------------
+ * Enrolment stage
+ * ---------------------------------------------------------------------- */
+
+/* The dial, the circle and the shimmer share one square area, so give it a
+   floor: below this the composition stops reading as a portrait frame.
+
+   The floor matches _DIAL_SIZE_COMPACT in enroll.py exactly, and must keep
+   matching it.  A larger floor would inflate the stage past the size the dial
+   asked for while the preview inside kept the size it asked for, and the
+   spec's 0.86 x R gap between the ticks and the portrait would silently open
+   up in narrow windows only. */
+.iris-stage {
+  min-width: 220px;
+  min-height: 220px;
+}
+
+/* The pose instruction. It changes often, so it is centred, large enough to
+   read peripherally while looking at the camera, and never moves. */
+.iris-hint {
+  font-size: var(--iris-text-title2);
+  font-weight: 500;
+  color: var(--iris-fg);
+  min-height: 30px;
+  transition: opacity 180ms ease-out;
+}
+
+.iris-hint.iris-settling {
+  opacity: 0.35;
+}
+
+.iris-substep {
+  font-size: var(--iris-text-caption);
+  color: var(--iris-fg-faint);
+  min-height: 20px;
+}
+
+/* -------------------------------------------------------------------------
+ * Settings
+ * ---------------------------------------------------------------------- */
+
+/* The plain-language sentence under the confidence slider. It swaps text as
+   the slider moves, so it reserves height to stop the page from reflowing. */
+.iris-explainer {
+  font-size: var(--iris-text-caption);
+  color: var(--iris-fg-dim);
+  min-height: 34px;
+  padding: var(--iris-space-1) 0;
+}
+
+.iris-explainer.iris-strict { color: var(--iris-success); }
+.iris-explainer.iris-loose  { color: var(--iris-warning); }
+
+.iris-window scale marks label {
+  font-size: var(--iris-text-caption);
+  color: var(--iris-fg-faint);
+}
+
+.iris-window scale {
+  padding-top: var(--iris-space-2);
+  padding-bottom: var(--iris-space-2);
+}
+
+/* Camera-test readout: a fixed-width block of live numbers. */
+.iris-readout {
+  font-family: monospace;
+  font-size: var(--iris-text-caption);
+  color: var(--iris-fg-dim);
+  font-feature-settings: "tnum" 1;
+}
+
+/* -------------------------------------------------------------------------
+ * Errors
+ * ---------------------------------------------------------------------- */
+
+/* Failure copy is normal body text in the normal colour. Red text shouting at
+   someone whose camera did not focus is both unhelpful and unkind; the colour
+   is reserved for destructive *controls*, where it warns before the fact. */
+.iris-error-title {
+  font-size: var(--iris-text-title2);
+  font-weight: 600;
+  color: var(--iris-fg);
+}
+
+.iris-error-body {
+  font-size: var(--iris-text-body);
+  color: var(--iris-fg-dim);
+}
+
+.iris-error-detail {
+  font-family: monospace;
+  font-size: var(--iris-text-caption);
+  color: var(--iris-fg-faint);
+  background-color: var(--iris-surface-sunk);
+  border-radius: var(--iris-radius-sm);
+  padding: var(--iris-space-3);
+}
+
+/* -------------------------------------------------------------------------
+ * Focus and keyboard
+ * ---------------------------------------------------------------------- */
+
+/* :focus-visible only, so the ring appears for keyboard users and never after
+   a mouse click. The offset keeps it clear of pill-shaped edges. */
+.iris-window *:focus-visible {
+  outline: 2px solid @accent_color;
+  outline-offset: 2px;
+  outline-style: solid;
+}
+
+.iris-window row:focus-visible,
+.iris-window button:focus-visible {
+  outline-offset: -2px;
+}

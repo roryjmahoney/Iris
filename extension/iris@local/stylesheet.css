@@ -1,0 +1,98 @@
+/* Iris — GNOME Shell styling.
+   Restrained, generous spacing, no heavy shadows. Reads on both the dark lock
+   screen and a light session. All colours are stated explicitly because the
+   lock screen does not inherit the session theme.
+
+   The colour literals below are the dark column of the token table in
+   docs/ANIMATION.md. St's CSS has no custom properties, so the values are
+   repeated rather than referenced; extension.js carries the same five as
+   PALETTE_DARK and the GTK app carries them as --iris-tick-* / --iris-dial-* in
+   src/iris/gui/style.css. Change one, change all three.
+
+       tick-idle    rgba(255, 255, 255, 0.28)
+       tick-active  rgb(120, 190, 255)
+       tick-muted   rgba(255, 255, 255, 0.22)
+       accent       rgb(120, 190, 255)
+       success      rgb(52, 199, 89)
+*/
+
+/* The pill now sits INSIDE the shell's AuthPrompt, as a child at index 1 —
+   between the avatar and the password entry — rather than floating in a group
+   of its own at a guessed screen position.
+
+   Two consequences for this rule:
+
+     - no margin. The AuthPrompt carries .login-dialog-prompt-layout, whose
+       `spacing: 12px` already separates every child of that column. A margin
+       here would be added to it, not instead of it.
+     - no min-width. The same class sets `min-width: 30em` on the column, so the
+       pill is centred in a box that is already comfortably wider than it is.
+
+   The padding is asymmetric because the dial is a circle in a square box: it
+   already carries its own optical margin on the left, and the text does not. */
+.iris-lock-hint {
+  spacing: 12px;
+  padding: 6px 20px 6px 6px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* The receded state, shared by every phase in which the camera is no longer the
+   thing being waited on: the attempt window has closed, the user has typed an
+   answer, or PAM has finished and refused. The pill has nothing to report, so
+   the dial holds a static dim ring and the chrome drops back with it. */
+.iris-lock-hint.iris-state-idle {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* A verdict this extension can actually attribute. Set only when the prompt
+   reported VERIFICATION_SUCCEEDED without ever having passed through
+   VERIFICATION_IN_PROGRESS — i.e. nobody typed anything, so the credential that
+   worked was a silent one. A typed password never lights this up. */
+.iris-lock-hint.iris-state-success {
+  background-color: rgba(52, 199, 89, 0.16);
+  border-color: rgba(52, 199, 89, 0.42);
+  color: rgb(190, 245, 205);
+}
+
+/* The 48-tick dial. Everything inside is drawn with Cairo and scaled off this
+   allocation, so this box is the only place its size is decided. St multiplies
+   these logical pixels by the display scale factor.
+
+   72px, down from the 96px used when the pill floated free. It is now stacked
+   directly above the password entry inside a column that already carries an
+   avatar, and every pixel of dial height pushes the field further down the
+   screen. 72px still gives R = 30px, so the 48 ticks sit ~4px apart and read as
+   a ring rather than as a smear; much below this and they merge. */
+.iris-dial {
+  width: 72px;
+  height: 72px;
+}
+
+.iris-hint-label {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+/* App elevation dialog: same state machine, centred instead of pill-shaped.
+   PAM's plain scanning banner is hidden only after this visual is attached. */
+.iris-lock-hint.iris-polkit-hint {
+  margin: 4px 24px;
+  padding: 8px;
+  spacing: 4px;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.iris-menu-status { font-weight: 600; }
+.iris-menu-detail {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  padding-bottom: 4px;
+}

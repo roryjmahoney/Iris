@@ -1,0 +1,74 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test, coverage, type-checker, and linter output
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+.tox/
+.nox/
+
+# Python packaging and build output
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Native build output
+*.o
+*.a
+pam/pam_iris.so
+extension/iris@local/schemas/gschemas.compiled
+
+# Generated visual-review frames
+tools/frames/
+tools/readme-gif-frames/
+
+# Local environments and temporary files
+.env
+.env.*
+!.env.example
+*.log
+*.tmp
+*.bak
+*~
+
+# Editors and IDEs
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+
+# Operating-system metadata
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Local Git worktrees
+.worktrees/
+.git-worktrees/
+worktrees/
+
+# The ONNX artifacts in models/ and curated files in docs/assets/ are
+# intentional repository assets and must remain trackable.
+!models/
+!models/*.onnx
+!docs/assets/
+!docs/assets/**

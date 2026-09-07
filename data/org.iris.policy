@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/software/polkit/policyconfig-1.dtd">
+<policyconfig>
+  <vendor>Iris</vendor>
+  <vendor_url>file:///usr/share/doc/iris/README.md</vendor_url>
+
+  <!--
+    The GTK settings app runs unprivileged. Enrolment, face removal and config
+    writes all touch root-owned state, so the app shells out to
+    `pkexec /usr/bin/iris <subcommand>`. This action governs that escalation.
+
+    auth_admin_keep, not "yes": enrolling a face is what lets that face unlock
+    the machine, so it must require an administrator, exactly like adding an SSH
+    key or changing a password. The _keep suffix caches the authorisation
+    briefly so a multi-step enrolment does not prompt at every stage.
+  -->
+  <action id="org.iris.manage">
+    <description>Manage Iris face authentication</description>
+    <message>Authentication is required to change face-authentication settings</message>
+    <icon_name>auth-fingerprint-symbolic</icon_name>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/iris</annotate>
+    <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+  </action>
+</policyconfig>

@@ -1,0 +1,9 @@
+{
+  "uuid": "iris@local",
+  "name": "Iris",
+  "description": "Face authentication status and controls for the lock screen, login screen and top bar.",
+  "shell-version": ["48", "49", "50"],
+  "session-modes": ["user", "unlock-dialog", "gdm"],
+  "settings-schema": "org.gnome.shell.extensions.iris",
+  "url": "file:///usr/share/doc/iris/README.md"
+}

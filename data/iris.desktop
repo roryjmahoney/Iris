@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Iris
+GenericName=Face Authentication
+Comment=Set up and manage face authentication
+Exec=/usr/bin/iris-settings
+Icon=auth-fingerprint-symbolic
+Terminal=false
+Categories=GNOME;GTK;Settings;DesktopSettings;Security;
+Keywords=face;facial;recognition;biometric;login;unlock;authentication;iris;
+StartupNotify=true
+X-GNOME-UsesNotifications=false
