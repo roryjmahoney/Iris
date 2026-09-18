@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://roryjmahoney.github.io/Iris/sitemap.xml
+

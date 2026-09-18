@@ -25,6 +25,7 @@ htmlcov/
 # Python packaging and build output
 build/
 dist/
+_site/
 *.egg-info/
 .eggs/
 pip-wheel-metadata/

@@ -20,7 +20,7 @@ Look at your laptop. That is the whole interaction.
 [![Storage](https://img.shields.io/badge/templates-AES--256--GCM%20%C2%B7%20TPM%202.0-2EA043)](docs/SECURITY.md)
 [![Offline](https://img.shields.io/badge/network-none-555555)](docs/SECURITY.md)
 
-[Install](#quick-install) · [Security model](docs/SECURITY.md) · [Recovery](docs/RECOVERY.md) · [Documentation](docs/README.md)
+[Website](https://roryjmahoney.github.io/Iris/) · [Install](#quick-install) · [Security model](docs/SECURITY.md) · [Recovery](docs/RECOVERY.md) · [Documentation](docs/README.md)
 
 </div>
 

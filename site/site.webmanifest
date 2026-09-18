@@ -1,0 +1,18 @@
+{
+  "name": "Iris",
+  "short_name": "Iris",
+  "description": "Local infrared face authentication for Ubuntu, GNOME, and Wayland.",
+  "start_url": "/Iris/",
+  "display": "standalone",
+  "background_color": "#0c0d10",
+  "theme_color": "#0c0d10",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
+

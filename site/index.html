@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Iris is local infrared face authentication for Ubuntu, GNOME, and Wayland—with GDM, screen unlock, sudo, polkit, and password fallback.">
+  <meta name="theme-color" content="#f7f7f9" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c0d10" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Iris">
+  <meta property="og:title" content="Iris — Face authentication for Linux">
+  <meta property="og:description" content="Look at your laptop. You’re in. Local infrared face authentication for Ubuntu and GNOME.">
+  <meta property="og:url" content="https://roryjmahoney.github.io/Iris/">
+  <meta property="og:image" content="https://roryjmahoney.github.io/Iris/assets/iris-dial.gif">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Iris — Face authentication for Linux">
+  <meta name="twitter:description" content="Local infrared face authentication for Ubuntu, GNOME, and Wayland.">
+  <meta name="twitter:image" content="https://roryjmahoney.github.io/Iris/assets/iris-dial.gif">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="canonical" href="https://roryjmahoney.github.io/Iris/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <title>Iris — Face authentication for Linux</title>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="Iris home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>Iris</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#security">Security</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/roryjmahoney/Iris/tree/main/docs">Docs</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch color theme" title="Switch color theme">
+          <svg class="theme-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path></svg>
+          <svg class="theme-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 15.2A8.4 8.4 0 0 1 8.8 3.8a8.4 8.4 0 1 0 11.4 11.4Z"></path></svg>
+        </button>
+        <a class="nav-github" href="https://github.com/roryjmahoney/Iris" aria-label="View Iris on GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.87c-2.78.6-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.6 9.6 0 0 1 12 6.82a9.6 9.6 0 0 1 2.5.34c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.86V21c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"></path></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero section-shell" aria-labelledby="hero-title">
+      <div class="hero-copy" data-reveal>
+        <p class="eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span> Local biometric authentication</p>
+        <h1 id="hero-title">Look at your laptop.<br><span>You’re in.</span></h1>
+        <p class="hero-lede">Iris brings fast, infrared-first face authentication to Ubuntu and GNOME—from the first login to everyday elevation prompts.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#install">Install Iris</a>
+          <a class="button button-secondary" href="https://github.com/roryjmahoney/Iris/releases/tag/v0.1.0">View v0.1.0 <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="local-note">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5.5 5.8v5.1c0 4.5 2.7 8.6 6.5 10.1 3.8-1.5 6.5-5.6 6.5-10.1V5.8L12 3Z"></path><path d="m9.2 12 1.8 1.8 3.9-4"></path></svg>
+          Face data stays encrypted on your computer. No account. No cloud.
+        </p>
+      </div>
+
+      <div class="hero-visual" data-reveal>
+        <div class="visual-glow" aria-hidden="true"></div>
+        <div class="auth-window">
+          <div class="window-chrome" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="auth-stage">
+            <picture>
+              <source data-dial-source media="(prefers-color-scheme: light)" srcset="assets/iris-dial-light.gif">
+              <img class="hero-dial" src="assets/iris-dial.gif" width="288" height="288" alt="Iris dial scanning and resolving into a green success checkmark">
+            </picture>
+            <div class="auth-copy">
+              <p class="auth-title">Looking at your face…</p>
+              <p class="auth-detail">Infrared camera active</p>
+            </div>
+          </div>
+          <div class="auth-footer">
+            <span><i aria-hidden="true"></i> On-device</span>
+            <span>Password is always available</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="compatibility" aria-label="Supported platform">
+      <div class="section-shell compatibility-inner">
+        <span>Built for</span>
+        <strong>Ubuntu 26.04</strong>
+        <i aria-hidden="true"></i>
+        <strong>GNOME 50</strong>
+        <i aria-hidden="true"></i>
+        <strong>Wayland</strong>
+        <i aria-hidden="true"></i>
+        <strong>AGPL-3.0</strong>
+      </div>
+    </section>
+
+    <section class="content-section section-shell" id="features" aria-labelledby="features-title">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">One face. Four surfaces.</p>
+        <h2 id="features-title">Authentication that feels native.</h2>
+        <p>Iris joins the Linux authentication stack instead of sitting beside it, so the same local recognition path works wherever PAM is supported.</p>
+      </div>
+      <div class="surface-grid">
+        <article class="surface-card" data-reveal>
+          <span class="card-number">01</span>
+          <div class="surface-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg></div>
+          <h3>First login</h3>
+          <p>The dial appears on the GDM greeter before your desktop session starts.</p>
+          <span class="card-label">GDM</span>
+        </article>
+        <article class="surface-card" data-reveal>
+          <span class="card-number">02</span>
+          <div class="surface-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"></path></svg></div>
+          <h3>Screen unlock</h3>
+          <p>GNOME ScreenShield begins recognition when you wake or lock the machine.</p>
+          <span class="card-label">Super + L</span>
+        </article>
+        <article class="surface-card" data-reveal>
+          <span class="card-number">03</span>
+          <div class="surface-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m4 17 6-5-6-5M12 19h8"></path></svg></div>
+          <h3>Terminal elevation</h3>
+          <p>Authenticate compatible <code>sudo</code> requests without interrupting your flow.</p>
+          <span class="card-label">sudo</span>
+        </article>
+        <article class="surface-card" data-reveal>
+          <span class="card-number">04</span>
+          <div class="surface-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 5.5 5.8v5.1c0 4.5 2.7 8.6 6.5 10.1 3.8-1.5 6.5-5.6 6.5-10.1V5.8L12 3Z"></path><path d="M9 12h6M12 9v6"></path></svg></div>
+          <h3>App authorization</h3>
+          <p>Polkit dialogs show the same calm scan and success motion as login.</p>
+          <span class="card-label">polkit</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="architecture-section" id="architecture" aria-labelledby="architecture-title">
+      <div class="section-shell architecture-layout">
+        <div class="section-heading" data-reveal>
+          <p class="eyebrow">Small, separated, inspectable</p>
+          <h2 id="architecture-title">The password prompt never becomes the face engine.</h2>
+          <p>A narrow PAM module sends a bounded request to a root-owned local daemon. Camera access, models, matching, and encrypted templates stay out of the authentication client.</p>
+          <a class="text-link" href="https://github.com/roryjmahoney/Iris/blob/main/docs/SECURITY.md">Read the security architecture <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="architecture-map" role="img" aria-label="GDM, sudo and polkit connect through the Iris PAM module and local socket to the Iris daemon, which owns the infrared camera, local models and encrypted templates" data-reveal>
+          <div class="map-clients">
+            <span>GDM</span><span>sudo</span><span>polkit</span>
+          </div>
+          <div class="map-connector" aria-hidden="true"><i></i></div>
+          <div class="map-node map-pam"><small>Minimal client</small><strong>pam_iris.so</strong></div>
+          <div class="map-wire"><span>/run/irisd/socket</span></div>
+          <div class="map-node map-daemon"><small>Root-owned service</small><strong>irisd</strong><em>Bounded request · fail-through</em></div>
+          <div class="map-branches" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="map-outputs"><span>IR camera</span><span>ONNX models</span><span>Encrypted store</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section section-shell" id="security" aria-labelledby="security-title">
+      <div class="section-heading section-heading-wide" data-reveal>
+        <p class="eyebrow">Security without mystery</p>
+        <h2 id="security-title">Private by architecture. Honest by design.</h2>
+        <p>Iris is explicit about what it protects, what it stores, and where biometrics remain weaker than a secret you know.</p>
+      </div>
+      <div class="security-grid">
+        <article data-reveal>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15.5A4.5 4.5 0 0 0 8.5 20h8a3.5 3.5 0 0 0 .7-6.9A5.5 5.5 0 0 0 6.5 11 4.5 4.5 0 0 0 4 15.5Z"></path><path d="M9 15h6M12 12v6"></path></svg>
+          <h3>No network path</h3>
+          <p>Recognition runs locally. Iris has no account system, telemetry endpoint, or cloud API.</p>
+        </article>
+        <article data-reveal>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"></path></svg>
+          <h3>Encrypted embeddings</h3>
+          <p>Only mathematical face templates are retained, protected with AES-256-GCM and optional TPM 2.0 sealing.</p>
+        </article>
+        <article data-reveal>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2-4.9"></path><path d="M5 4v4h4M9.5 12h5M12 9.5v5"></path></svg>
+          <h3>Password fallback</h3>
+          <p>Camera, match, transport, or timeout failures return control to the remaining PAM stack.</p>
+        </article>
+      </div>
+      <aside class="security-note" data-reveal>
+        <div class="security-note-mark" aria-hidden="true">!</div>
+        <div>
+          <h3>A convenience factor—not a magic shield.</h3>
+          <p>Face authentication is a convenience factor, not a replacement for a strong password or passkey. Iris has no depth sensor and is not certified against ISO/IEC 30107-3. Keep password fallback enabled and review the full <a href="https://github.com/roryjmahoney/Iris/blob/main/docs/SECURITY.md">Security model</a> before using it for privilege elevation.</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="install-section" id="install" aria-labelledby="install-title">
+      <div class="section-shell install-layout">
+        <div class="install-copy" data-reveal>
+          <p class="eyebrow">A deliberate setup</p>
+          <h2 id="install-title">Test recognition.<br>Then enable login.</h2>
+          <p>Iris keeps PAM disabled during the first install. Enroll and test your face first; only then opt in to each authentication surface.</p>
+          <ol class="install-steps">
+            <li><span>1</span><div><strong>Install</strong><small>Build the daemon, app, extension, and PAM module.</small></div></li>
+            <li><span>2</span><div><strong>Enroll &amp; test</strong><small>Confirm your camera and fallback work reliably.</small></div></li>
+            <li><span>3</span><div><strong>Opt in</strong><small>Enable GDM, sudo, or polkit individually.</small></div></li>
+          </ol>
+        </div>
+        <div class="terminal-card" data-reveal>
+          <div class="terminal-header">
+            <span><i></i><i></i><i></i></span>
+            <strong>Terminal</strong>
+            <button type="button" class="copy-button" data-copy-target="install-command" aria-label="Copy installation commands">Copy</button>
+          </div>
+          <pre id="install-command"><code><span class="comment"># Get Iris and install reviewed Ubuntu packages</span>
+git clone https://github.com/roryjmahoney/Iris.git
+cd Iris
+sed '/^[[:space:]]*#/d; /^[[:space:]]*$/d' \
+  requirements-apt.txt | xargs sudo apt install
+sudo ./install.sh
+
+<span class="comment"># Enroll and prove recognition before changing PAM</span>
+sudo iris enroll
+sudo iris test
+
+<span class="comment"># Enable GDM login and GNOME unlock</span>
+sudo ./install.sh --gdm</code></pre>
+          <div class="terminal-footer">
+            <span>Ubuntu 26.04 · GNOME 50</span>
+            <a href="https://github.com/roryjmahoney/Iris/blob/main/docs/INSTALLATION.md">Full installation guide <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section section-shell docs-section" aria-labelledby="docs-title">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">Know what runs at login</p>
+        <h2 id="docs-title">Documentation made for recovery, too.</h2>
+      </div>
+      <div class="docs-grid">
+        <a href="https://github.com/roryjmahoney/Iris/blob/main/docs/INSTALLATION.md" data-reveal><span>01</span><div><strong>Installation</strong><small>Prerequisites, setup, PAM opt-in, and removal.</small></div><i aria-hidden="true">↗</i></a>
+        <a href="https://github.com/roryjmahoney/Iris/blob/main/docs/CONFIGURATION.md" data-reveal><span>02</span><div><strong>Configuration</strong><small>Cameras, thresholds, timeouts, and defaults.</small></div><i aria-hidden="true">↗</i></a>
+        <a href="https://github.com/roryjmahoney/Iris/blob/main/docs/TROUBLESHOOTING.md" data-reveal><span>03</span><div><strong>Troubleshooting</strong><small>Camera, daemon, PAM, Shell, and TPM diagnosis.</small></div><i aria-hidden="true">↗</i></a>
+        <a href="https://github.com/roryjmahoney/Iris/blob/main/docs/RECOVERY.md" data-reveal><span>04</span><div><strong>Recovery</strong><small>Password fallback and recovery from a bad PAM edit.</small></div><i aria-hidden="true">↗</i></a>
+      </div>
+    </section>
+
+    <section class="content-section section-shell faq-section" id="faq" aria-labelledby="faq-title">
+      <div class="section-heading" data-reveal>
+        <p class="eyebrow">Straight answers</p>
+        <h2 id="faq-title">Before you install.</h2>
+      </div>
+      <div class="faq-list" data-reveal>
+        <details>
+          <summary>Does Iris upload my face?</summary>
+          <p>No. Detection and matching run on your machine. Iris stores encrypted numerical embeddings, never enrollment photographs, under the root-owned local data directory.</p>
+        </details>
+        <details>
+          <summary>What happens when recognition fails?</summary>
+          <p>Iris fails through to the rest of the PAM stack. Your password remains available when the camera is missing, matching times out, or the daemon cannot answer.</p>
+        </details>
+        <details>
+          <summary>Do I need an infrared camera?</summary>
+          <p>Infrared is strongly preferred and receives first-class hardware selection and strobe handling. Consult the hardware guide before relying on a conventional webcam.</p>
+        </details>
+        <details>
+          <summary>Is every Linux desktop supported?</summary>
+          <p>Not yet. Iris currently targets Ubuntu 26.04, GNOME 50, and Wayland. The core PAM path is portable in principle, but other distributions and shells are not release targets for v0.1.0.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="closing-section">
+      <div class="section-shell closing-inner" data-reveal>
+        <div>
+          <p class="eyebrow">Open source. Local first.</p>
+          <h2>Make Linux login feel effortless.</h2>
+        </div>
+        <div class="closing-actions">
+          <a class="button button-primary" href="https://github.com/roryjmahoney/Iris">Explore the source</a>
+          <a class="button button-secondary" href="https://github.com/roryjmahoney/Iris/issues">Report an issue</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="section-shell footer-inner">
+      <div class="footer-brand">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <div><strong>Iris</strong><small>Local face authentication for Linux.</small></div>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/roryjmahoney/Iris">GitHub</a>
+        <a href="https://github.com/roryjmahoney/Iris/releases">Releases</a>
+        <a href="https://github.com/roryjmahoney/Iris/tree/main/docs">Documentation</a>
+        <a href="https://github.com/roryjmahoney/Iris/blob/main/LICENSE">AGPL-3.0</a>
+      </div>
+      <p class="footer-meta">Built for Ubuntu · No telemetry · No cloud</p>
+    </div>
+  </footer>
+
+  <p class="sr-only" aria-live="polite" data-live-region></p>
+  <script src="app.js" defer></script>
+</body>
+</html>
