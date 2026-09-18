@@ -12,9 +12,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "site"
-DIAL_ASSETS = (
-    ROOT / "docs" / "assets" / "iris-dial.gif",
-    ROOT / "docs" / "assets" / "iris-dial-light.gif",
+SITE_DIAL_ASSETS = (
+    SOURCE / "assets" / "iris-dial-site.gif",
+    SOURCE / "assets" / "iris-dial-site-light.gif",
 )
 
 
@@ -28,13 +28,13 @@ def build(output: Path) -> None:
             raise SystemExit(f"refusing to replace non-directory output: {output}")
         shutil.rmtree(output)
 
-    shutil.copytree(SOURCE, output)
-    assets = output / "assets"
-    assets.mkdir(parents=True, exist_ok=True)
-    for asset in DIAL_ASSETS:
+    for asset in SITE_DIAL_ASSETS:
         if not asset.is_file():
-            raise SystemExit(f"missing canonical dial asset: {asset}")
-        shutil.copy2(asset, assets / asset.name)
+            raise SystemExit(
+                f"missing website dial asset: {asset}; run "
+                "tools/render_readme_gif.py --site --both"
+            )
+    shutil.copytree(SOURCE, output)
     (output / ".nojekyll").touch()
     print(f"Built Iris website in {output}")
 
@@ -48,4 +48,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

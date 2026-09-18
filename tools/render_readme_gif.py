@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
 #
-"""Render the README GIF from Iris's shipping dial model and painter.
+"""Render repository GIFs from Iris's shipping dial model and painter.
 
 No dial geometry or animation constants are duplicated here. Frames come from
 ``iris.gui.widgets.DialModel`` and are painted by ``tools/render_dial.py``, the
@@ -40,8 +40,20 @@ HOLD_FRAMES = 14
 LIGHT_BG = (0.984, 0.988, 0.992)
 DARK_BG = (0.055, 0.055, 0.065)
 
+# The website places the dial inside a solid portion of its authentication
+# card. These values mirror --dial-surface in site/styles.css so the raster
+# animation has no visible rectangular edge. Keep the README colours above
+# separate: GitHub's own light and dark canvases are different surfaces.
+SITE_LIGHT_BG = (1.0, 1.0, 1.0)
+SITE_DARK_BG = (23 / 255, 24 / 255, 29 / 255)
 
-def _paint_frame(model: DialModel, now_us: int, dark: bool = True) -> Image.Image:
+
+def _paint_frame(
+    model: DialModel,
+    now_us: int,
+    dark: bool = True,
+    background: tuple[float, float, float] | None = None,
+) -> Image.Image:
     model.advance(now_us, reduced=False)
     frame = model.build_frame(
         SIDE,
@@ -51,7 +63,12 @@ def _paint_frame(model: DialModel, now_us: int, dark: bool = True) -> Image.Imag
         reduced=False,
     )
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, SIDE, SIDE)
-    paint(cairo.Context(surface), frame, SIDE, bg=DARK_BG if dark else LIGHT_BG)
+    paint(
+        cairo.Context(surface),
+        frame,
+        SIDE,
+        bg=background if background is not None else (DARK_BG if dark else LIGHT_BG),
+    )
 
     encoded = io.BytesIO()
     surface.write_to_png(encoded)
@@ -60,7 +77,10 @@ def _paint_frame(model: DialModel, now_us: int, dark: bool = True) -> Image.Imag
         return image.convert("RGB")
 
 
-def build_frames(dark: bool = True) -> list[Image.Image]:
+def build_frames(
+    dark: bool = True,
+    background: tuple[float, float, float] | None = None,
+) -> list[Image.Image]:
     """Build one calm idle-to-success loop from a synthetic monotonic clock."""
     total = (
         IDLE_FRAMES
@@ -89,13 +109,24 @@ def build_frames(dark: bool = True) -> list[Image.Image]:
         elif index == success_at:
             model.enter(DialModel.STATE_SUCCESS, now_us)
 
-        frames.append(_paint_frame(dark=dark, model=model, now_us=now_us))
+        frames.append(
+            _paint_frame(
+                dark=dark,
+                model=model,
+                now_us=now_us,
+                background=background,
+            )
+        )
 
     return frames
 
 
-def write_gif(output: Path, dark: bool = True) -> None:
-    frames = build_frames(dark=dark)
+def write_gif(
+    output: Path,
+    dark: bool = True,
+    background: tuple[float, float, float] | None = None,
+) -> None:
+    frames = build_frames(dark=dark, background=background)
     output.parent.mkdir(parents=True, exist_ok=True)
 
     paletted = [
@@ -140,16 +171,37 @@ def main() -> int:
         action="store_true",
         help="render both theme variants in one run",
     )
+    parser.add_argument(
+        "--site",
+        action="store_true",
+        help="render website variants into site/assets with matching surfaces",
+    )
     args = parser.parse_args()
 
-    assets = REPOSITORY / "docs" / "assets"
+    assets = REPOSITORY / ("site/assets" if args.site else "docs/assets")
+    dark_background = SITE_DARK_BG if args.site else None
+    light_background = SITE_LIGHT_BG if args.site else None
+    dark_name = "iris-dial-site.gif" if args.site else "iris-dial.gif"
+    light_name = "iris-dial-site-light.gif" if args.site else "iris-dial-light.gif"
     if args.both:
-        write_gif(assets / "iris-dial.gif", dark=True)
-        write_gif(assets / "iris-dial-light.gif", dark=False)
+        write_gif(
+            assets / dark_name,
+            dark=True,
+            background=dark_background,
+        )
+        write_gif(
+            assets / light_name,
+            dark=False,
+            background=light_background,
+        )
         return 0
 
-    default = assets / ("iris-dial-light.gif" if args.light else "iris-dial.gif")
-    write_gif(args.output or default, dark=not args.light)
+    default = assets / (light_name if args.light else dark_name)
+    write_gif(
+        args.output or default,
+        dark=not args.light,
+        background=light_background if args.light else dark_background,
+    )
     return 0
 
 

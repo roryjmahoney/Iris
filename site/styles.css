@@ -16,6 +16,7 @@
   --blue-soft: rgba(0, 122, 255, 0.1);
   --green: #28a745;
   --green-soft: rgba(40, 167, 69, 0.12);
+  --dial-surface: #ffffff;
   --amber: #9a6207;
   --amber-soft: rgba(154, 98, 7, 0.1);
   --terminal: #121317;
@@ -45,6 +46,7 @@
   --blue-soft: rgba(120, 190, 255, 0.13);
   --green: #34c759;
   --green-soft: rgba(52, 199, 89, 0.15);
+  --dial-surface: #17181d;
   --amber: #e0a33a;
   --amber-soft: rgba(224, 163, 58, 0.13);
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.35), 0 14px 36px rgba(0, 0, 0, 0.26);
@@ -68,6 +70,7 @@
     --blue-soft: rgba(120, 190, 255, 0.13);
     --green: #34c759;
     --green-soft: rgba(52, 199, 89, 0.15);
+    --dial-surface: #17181d;
     --amber: #e0a33a;
     --amber-soft: rgba(224, 163, 58, 0.13);
     --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.35), 0 14px 36px rgba(0, 0, 0, 0.26);
@@ -474,6 +477,7 @@ button {
   display: grid;
   place-items: center;
   align-content: center;
+  background: var(--dial-surface);
 }
 
 .hero-dial {

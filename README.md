@@ -161,9 +161,12 @@ painter with:
 
 ```bash
 python3 tools/render_readme_gif.py --both
+python3 tools/render_readme_gif.py --site --both
 ```
 
-That writes both `docs/assets/iris-dial.gif` and `docs/assets/iris-dial-light.gif`.
+The first command writes the README pair under `docs/assets/`; the second writes
+the website pair under `site/assets/` with backgrounds matched to the website's
+authentication card.
 The README selects between them with `<picture>` and `prefers-color-scheme`, so
 the hero animation stays legible on GitHub's light and dark themes. Pass
 `--light` or omit it to render a single variant.

@@ -39,12 +39,12 @@
     if (explicit === "light" || explicit === "dark") {
       dialSource.media = "not all";
       dialImage.src = explicit === "light"
-        ? "assets/iris-dial-light.gif"
-        : "assets/iris-dial.gif";
+        ? "assets/iris-dial-site-light.gif"
+        : "assets/iris-dial-site.gif";
       return;
     }
     dialSource.media = "(prefers-color-scheme: light)";
-    dialImage.src = "assets/iris-dial.gif";
+    dialImage.src = "assets/iris-dial-site.gif";
   };
 
   try {

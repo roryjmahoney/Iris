@@ -89,12 +89,38 @@ class WebsiteContractTests(unittest.TestCase):
             self.assertFalse(parsed.scheme or parsed.netloc, f"runtime asset is external: {ref}")
             target = (SITE / parsed.path).resolve()
             self.assertTrue(target.is_relative_to(SITE.resolve()), f"asset escapes site/: {ref}")
-            if parsed.path.startswith("assets/iris-dial"):
+            if parsed.path.startswith("assets/iris-dial") and not target.is_file():
                 target = ROOT / "docs" / "assets" / Path(parsed.path).name
             self.assertTrue(target.is_file(), f"missing local asset: {ref}")
         lowered = (self.html + self.js).lower()
         for forbidden in ("googletagmanager", "google-analytics", "fonts.googleapis", "unpkg.com", "jsdelivr"):
             self.assertNotIn(forbidden, lowered)
+
+    def test_dial_background_uses_site_surface_assets(self) -> None:
+        dark_asset = SITE / "assets" / "iris-dial-site.gif"
+        light_asset = SITE / "assets" / "iris-dial-site-light.gif"
+        self.assertTrue(dark_asset.is_file(), "dark website dial asset is missing")
+        self.assertTrue(light_asset.is_file(), "light website dial asset is missing")
+        self.assertNotEqual(
+            dark_asset.read_bytes(),
+            (ROOT / "docs" / "assets" / "iris-dial.gif").read_bytes(),
+            "website dial must not reuse the README-specific background",
+        )
+        self.assertNotEqual(
+            light_asset.read_bytes(),
+            (ROOT / "docs" / "assets" / "iris-dial-light.gif").read_bytes(),
+            "website dial must not reuse the README-specific background",
+        )
+        self.assertIn("assets/iris-dial-site.gif", self.html)
+        self.assertIn("assets/iris-dial-site-light.gif", self.html)
+        self.assertIn('"assets/iris-dial-site.gif"', self.js)
+        self.assertIn('"assets/iris-dial-site-light.gif"', self.js)
+        self.assertIn("--dial-surface: #ffffff;", self.css)
+        self.assertIn("--dial-surface: #17181d;", self.css)
+        self.assertRegex(
+            self.css,
+            r"\.auth-stage\s*\{[^}]*background:\s*var\(--dial-surface\)",
+        )
 
     def test_safe_installation_language(self) -> None:
         self.assertIn("sudo ./install.sh", self.html)
@@ -126,8 +152,8 @@ class WebsiteContractTests(unittest.TestCase):
                 "app.js",
                 "favicon.svg",
                 ".nojekyll",
-                "assets/iris-dial.gif",
-                "assets/iris-dial-light.gif",
+                "assets/iris-dial-site.gif",
+                "assets/iris-dial-site-light.gif",
             ):
                 self.assertTrue((output / relative).is_file(), f"build omitted {relative}")
             self.assertEqual(
@@ -151,4 +177,3 @@ class WebsiteContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
