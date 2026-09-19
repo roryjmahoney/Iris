@@ -156,6 +156,12 @@ Install the additional test and documentation-tool dependencies from
 ./tests/run.sh
 ```
 
+The [Iris tests workflow](.github/workflows/tests.yml) runs this full suite on
+every pull request and push to `main`, using Ubuntu 26.04. It checks the Python
+contracts, GNOME Shell resources, installer rollback, and native PAM fallback;
+skipped tests fail CI. These headless checks do not validate camera recognition
+or a live graphical login.
+
 Regenerate the README animation from the shipping `DialModel` and its Cairo
 painter with:
 

@@ -1,0 +1,52 @@
+name: Iris tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iris-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Full regression suite
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Install test dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          # Install the subset needed by headless tests, including real GNOME
+          # resources and PAM modules; do not run the Iris installer in CI.
+          sed '/^[[:space:]]*#/d; /^[[:space:]]*$/d' requirements-dev-apt.txt \
+            | xargs sudo --preserve-env=DEBIAN_FRONTEND apt-get install -y --no-install-recommends \
+                python3 python3-numpy python3-opencv python3-cryptography \
+                build-essential libpam0g-dev libpam-modules acl \
+                gnome-shell gnome-shell-extension-prefs libglib2.0-bin
+
+      - name: Run full regression suite
+        run: |
+          # Use Ubuntu's Python and Node with their apt-installed modules.
+          export PATH="/usr/bin:/bin:$PATH"
+          ./tests/run.sh 2>&1 | tee test-results.log
+          # Missing prerequisites must not silently reduce CI coverage.
+          if grep -Eq 'SKIP:|skipped[ =]' test-results.log; then
+            echo '::error::The full regression suite must run without skipped tests.'
+            exit 1
+          fi
