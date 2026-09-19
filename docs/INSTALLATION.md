@@ -149,3 +149,9 @@ sudo iris clear --yes
 
 For an authentication problem, use the [recovery guide](RECOVERY.md) before
 removing files manually.
+
+## Reported validation
+
+On 2026-09-19, the project owner reported having installed, upgraded, and removed
+Iris in their own clean Ubuntu environment. This records a manual test report;
+the Ubuntu version, Iris revisions, and detailed results were not supplied.

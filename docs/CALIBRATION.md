@@ -2,8 +2,14 @@
 
 # Iris — Threshold Calibration (measured on target hardware)
 
-Measured directly on the deployment machine, not assumed. Re-run with `iris doctor --calibrate`
-after any camera or lighting change.
+These recorded measurements describe one subject on the original target machine.
+They do not establish false-accept or false-reject rates across users or cameras.
+Re-run `iris doctor --calibrate` after a camera or lighting change.
+
+**Keep the shipped threshold of `0.363` as the starting point.** If recognition
+is unreliable, add enrollment captures in different lighting and head positions
+before considering a threshold change. A higher threshold can reject legitimate
+attempts; these measurements do not quantify its security benefit.
 
 ## Rig
 - Camera: `/dev/video2` — LGE IR-FHD, GREY 8-bit, 640x360 @ 15 fps
@@ -31,40 +37,36 @@ after any camera or lighting change.
 
 ## Interpretation
 
-SFace's published `0.363` cosine threshold is tuned on **RGB** LFW imagery. The concern was that
-grayscale IR input would depress genuine-pair similarity toward the threshold. Measurement shows the
-opposite: the genuine distribution sits far above it, with a **+0.375 margin at p5** and a worst
-observed genuine pair still at 0.621.
+Within this single session, the lowest same-person similarity was `0.621` and
+p5 was `0.738`. Those observations describe frames captured seconds apart;
+they do not establish a minimum score for later authentication attempts.
+The post-enrolment measurements below include a legitimate attempt at `0.371`.
 
-**Consequence:** 0.363 is unnecessarily permissive on this hardware. Every genuine sample cleared
-0.62, so the threshold can be raised substantially to tighten impostor rejection without introducing
-false rejections.
+Iris ships `recognition.threshold = 0.363`, as specified in `SPEC.md` and
+`iris.config.DEFAULTS`. Retain that default unless you deliberately choose to
+experiment with a stricter cutoff and evaluate the resulting retries.
 
-- `0.363` — upstream default. Safe, but leaves ~0.26 of unnecessary slack below the worst genuine pair.
-- **`0.500` — recommended default.** Still 0.12 below the worst observed genuine sample and 0.24
-  below p5, while cutting the accepted impostor region roughly in half.
-- `0.600` — hardened. Approaches the observed genuine minimum; expect occasional retries at bad angles.
+- `0.363` — shipped default; below all seven recorded post-enrolment scores.
+- `0.500` — a stricter optional cutoff; above one of those seven scores.
+- `0.600` — stricter still; also above that same recorded score. The small
+  sample cannot predict how often future attempts would be rejected.
 
-**Iris nonetheless ships `threshold = 0.363`,** the value `SPEC.md` specifies and
-`iris.config.DEFAULTS` contains — 0.5 is a *recommendation*, surfaced as such in the settings panel,
-not the shipped default. The reason is the limit of this study: it is a *single-subject*
-genuine-pair measurement. It bounds the false-reject side well, but it does **not** measure the
-impostor distribution, which is what the upstream 0.363 figure was derived from. Raising the shipped
-default on that evidence would trade a well-studied operating point for one validated against a
-sample of one. Raise it yourself with `sudo iris config set recognition.threshold 0.5` once you have
-lived with face unlock for a few days and know your own genuine-pair floor.
+This study includes no impostor trials or presentation-attack evaluation.
+Raising a cutoff reduces the set of accepted similarity scores, but does not
+show that false accepts are halved, that look-alikes are rejected, or that
+spoofing is prevented. Nor does this sample establish a universally safe
+threshold for IR cameras. See the [security model](SECURITY.md).
 
-Consecutive-match confirmation (`required_matches`) matters more than threshold tuning for
-robustness: at 15 fps with ~50% of frames dark, 3 consecutive matches costs roughly 0.4 s and makes a
-single lucky frame insufficient to authenticate.
-
+The default `required_matches = 3` requires consecutive matching, live frames;
+a single matching frame is insufficient. These measurements do not compare
+its security contribution with threshold changes.
 
 ---
 
-## Post-enrolment measurement (the one that actually matters)
+## Post-enrolment measurements
 
 The study above compares frames captured *seconds apart in one session*, which is
-an optimistic upper bound. The number that governs day-to-day behaviour is a live
+an optimistic sample of matching conditions. The number that governs day-to-day behaviour is a live
 frame compared against **templates enrolled in an earlier session** — different
 pose, different lighting, different hair. Measured after real enrolment
 (15 samples, `primary`), seven consecutive `iris test` runs:
@@ -79,18 +81,23 @@ pose, different lighting, different hair. Measured after real enrolment
 | 6 | 0.857 | 1.20 s |
 | 7 | 0.845 | 1.87 s |
 
-Steady state is **0.73-0.87**, which corroborates the within-session p5 of 0.738.
-Authentication settles at **~1.2 s**; the first attempt after the camera has been
-idle costs a few seconds of warm-up.
+Six of the seven recorded scores were between `0.728` and `0.872`; four runs
+took `1.20 s`. The observed elapsed times ranged from `1.20 s` to `5.75 s`.
+These runs are too few to establish general latency or reliability guarantees.
 
-**The outlier is the interesting part.** Run 1 scored 0.371 — over the shipped
-0.363 threshold by 0.008. A marginal frame at an awkward angle really does occur.
-That single data point is the argument *against* raising the threshold to 0.5 as
-casually as the section above suggests: 0.5 would have rejected that attempt and
-forced a retry. Six of seven runs would still pass comfortably.
+The cold-start run scored `0.371`, only `0.008` above the shipped threshold.
+Its recorded score would not clear either `0.500` or `0.600`. This is evidence
+against recommending a higher threshold on the assumption that genuine matches
+always score above `0.621`.
 
-So the shipped default of **0.363 stands**, and 0.5 remains a deliberate
-hardening choice with a known cost (an occasional retry at bad angles), not a
-free upgrade. If you want the margin without the retries, the better lever is a
-richer enrolment - add captures in different lighting and head positions - rather
-than moving the threshold.
+## Practical guidance
+
+Keep `0.363` as the starting point. For unreliable matching, check camera setup
+and improve enrollment across lighting and head positions, then evaluate real
+attempts against those saved templates. Better enrollment may help; it does not
+guarantee first-attempt success.
+
+If you deliberately raise the threshold, test across separate sessions,
+including cold starts and your usual lighting and poses. Expect that additional
+retries may occur, retain password fallback, and do not treat your own successful
+matches as evidence of impostor or spoof rejection.

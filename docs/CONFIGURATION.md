@@ -13,9 +13,13 @@ Use the CLI for normal changes:
 iris config
 iris config keys
 iris config get recognition.threshold
-sudo iris config set recognition.threshold 0.5
+sudo iris config set recognition.threshold 0.363
 sudo iris config unset recognition.threshold
 ```
+
+Use the shipped threshold of `0.363` as the starting point. Higher values are
+optional stricter cutoffs that can reject legitimate attempts; see the
+[calibration guidance](CALIBRATION.md) before changing it.
 
 Changes apply to the next authentication request. Restarting `irisd` forces an
 immediate reload:

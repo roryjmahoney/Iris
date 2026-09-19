@@ -36,17 +36,16 @@ if TYPE_CHECKING:  # pragma: no cover - import cycle avoidance only
 
 _LOG = logging.getLogger("iris.gui.settings")
 
-#: Slider bounds.  Below 0.30 the system starts accepting strangers; above
-#: 0.70 it is stricter than the worst genuine sample measured on this hardware
-#: (0.621, see docs/CALIBRATION.md) and would reject the enrolled user.
+#: UI slider bounds, not validated security or reliability limits.
+#: Recorded genuine scores vary across sessions; see docs/CALIBRATION.md.
 _THRESHOLD_MIN: Final[float] = 0.30
 _THRESHOLD_MAX: Final[float] = 0.70
 _THRESHOLD_STEP: Final[float] = 0.005
 
-#: Named points on the slider, from the calibration study.
+#: Descriptive cutoff labels; the study does not validate an optimal threshold.
 _THRESHOLD_MARKS: Final[tuple[tuple[float, str], ...]] = (
-    (0.363, "Standard"),
-    (0.500, "Recommended"),
+    (0.363, "Default"),
+    (0.500, "Stricter"),
     (0.600, "Strict"),
 )
 
@@ -267,11 +266,8 @@ class SettingsPage(Adw.NavigationPage):
             self._timeout_row.set_value(
                 min(_TIMEOUT_MAX, max(_TIMEOUT_MIN, float(auth.get("timeout", 8.0))))
             )
-            # The fallback is the shipped default (0.363), not the 0.500 this
-            # panel *recommends*. Showing the recommendation as if it were the
-            # current value would mean the slider disagrees with the daemon, and
-            # pressing Apply would silently tighten the threshold the user never
-            # touched.
+            # Use the daemon's shipped default when this key is absent, so
+            # Apply cannot silently change an untouched threshold.
             from iris.config import DEFAULTS
 
             self._threshold_scale.set_value(
@@ -394,20 +390,20 @@ class SettingsPage(Adw.NavigationPage):
         if value < 0.42:
             self._threshold_explainer.add_css_class("iris-loose")
             text = (
-                "Lenient. You will almost never be asked twice, but a sibling or "
-                "a good photograph has a better chance of getting in."
+                "The shipped default is 0.363. Start there and improve enrollment "
+                "if matching is unreliable. Lower values accept more similarity scores."
             )
         elif value <= 0.56:
             text = (
-                "Balanced. On this camera every genuine match measured well above "
-                "this line, so you should get in first time while look-alikes do "
-                "not."
+                "Stricter than the default. A recorded genuine attempt scored 0.371 "
+                "and would not clear this cutoff. Test across separate sessions; "
+                "the security benefit has not been measured."
             )
         else:
             self._threshold_explainer.add_css_class("iris-strict")
             text = (
-                "Strict. The safest setting, at the cost of the occasional retry "
-                "at an awkward angle or in unusual lighting."
+                "Strict cutoff. Genuine attempts may need more retries. "
+                "These measurements do not establish impostor or spoof rejection."
             )
         self._threshold_explainer.set_label(text)
 
