@@ -43,6 +43,7 @@ import logging
 import math
 import os
 import pwd
+import re
 import shutil
 import stat
 import sys
@@ -1809,6 +1810,47 @@ def _config_keys(args: argparse.Namespace) -> int:
 # command: status
 # --------------------------------------------------------------------------
 
+def _require_keyring_hooks() -> None:
+    """Only enable storage when the optional GDM integration is installed."""
+    try:
+        lines = (Path(PAM_DIR) / "gdm-password").read_text().splitlines()
+        auth = lines.index("auth optional pam_iris_keyring.so")
+        session = lines.index("session optional pam_iris_keyring.so")
+        gkr = next(i for i, line in enumerate(lines)
+                   if re.fullmatch(r"session\s+optional\s+pam_gnome_keyring\.so\s+auto_start", line.strip()))
+        module = any(Path(path).with_name("pam_iris_keyring.so").is_file()
+                     for path in PAM_MODULE_PATHS)
+        if not module or not auth < session < gkr:
+            raise ValueError("missing or misordered hooks")
+    except (OSError, ValueError, StopIteration) as exc:
+        raise CommandError(
+            "optional keyring integration is not installed",
+            hint="from the Iris checkout, run: sudo ./install.sh --keyring",
+        ) from exc
+
+
+def cmd_keyring(args: argparse.Namespace) -> int:
+    require_root("keyring", f"iris keyring {args.keyring_action}",
+                 subject="root-owned keyring credential state")
+    user = resolve_user(args.user)
+    from iris import keyring
+
+    if args.keyring_action == "enable":
+        _require_keyring_hooks()
+    try:
+        result = getattr(keyring, args.keyring_action)(user)
+    except (keyring.KeyringError, OSError) as exc:
+        raise CommandError(str(exc)) from exc
+    if args.json:
+        print(json.dumps({"ok": True, **result}))
+    else:
+        print(f"Keyring auto-unlock for {user}: {result['state']}")
+        if result['state'] == "pending-password-login":
+            print("Use your normal password for one GDM login to finish setup. "
+                  "The login and keyring passwords must match.")
+    return EXIT_OK
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     user = resolve_user(args.user)
     cfg, source = load_effective_config(args.socket)
@@ -2986,6 +3028,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="calibration capture budget (default: %(default)s)",
     )
     doctor.set_defaults(func=cmd_doctor)
+
+    keyring_parser = subparsers.add_parser(
+        "keyring", help="opt in to TPM-backed GNOME Keyring auto-unlock (root)",
+    )
+    keyring_parser.add_argument("keyring_action", choices=("enable", "disable", "status"))
+    keyring_parser.add_argument("--user", help="local account (default: invoking user)")
+    keyring_parser.add_argument("--json", action="store_true", help="machine-readable output")
+    keyring_parser.set_defaults(func=cmd_keyring)
 
     status = subparsers.add_parser(
         "status", help="summarise the current state",

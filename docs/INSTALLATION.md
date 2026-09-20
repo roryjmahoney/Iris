@@ -125,6 +125,15 @@ The extension shows status and lock-screen scan motion only. It is unprivileged
 and cannot reach the daemon's root-only socket or make an authentication
 decision.
 
+## Optional keyring auto-unlock
+
+After face authentication works, use `sudo ./install.sh --keyring` to add the
+optional GDM hooks, then `sudo iris keyring enable` to opt in your account. One
+ordinary password login provisions the TPM-protected credential; later face
+logins can unlock the login keyring without another prompt. This requires matching
+login/keyring passwords and an existing TPM-backed Iris key. Read the
+[keyring guide](KEYRING.md) for setup, disabling, and the added security tradeoff.
+
 ## Updating
 
 Run the current checkout's installer again with the same PAM flags. Existing

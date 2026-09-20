@@ -45,6 +45,8 @@ the fallback.
 - OpenCV YuNet face detection and SFace embeddings from local ONNX models.
 - Multi-frame matching and IR presentation-attack heuristics.
 - AES-256-GCM-encrypted templates, with optional TPM 2.0 key sealing.
+- Optional [GNOME Keyring auto-unlock](docs/KEYRING.md) after one password login,
+  requiring TPM-backed storage and explicit per-user opt-in.
 - A GTK4/libadwaita settings app, CLI diagnostics, and a presentation-only
   GNOME Shell extension.
 - An intentionally narrow PAM client: image processing, models, camera access,
@@ -185,6 +187,7 @@ curated README asset under `docs/assets/` is tracked.
 | Guide | Contents |
 |---|---|
 | [Installation](docs/INSTALLATION.md) | Dependencies, safe setup, PAM opt-in, extension, uninstall |
+| [Keyring auto-unlock](docs/KEYRING.md) | Opt-in setup, TPM requirements, recovery, and trust boundaries |
 | [Configuration](docs/CONFIGURATION.md) | Settings, defaults, bounds, advanced keys, reason codes |
 | [Hardware](docs/HARDWARE.md) | Camera discovery, IR strobing, measured target notes |
 | [Troubleshooting](docs/TROUBLESHOOTING.md) | Camera, daemon, PAM, shell, TPM, and lockout diagnosis |

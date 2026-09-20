@@ -592,3 +592,18 @@ have succeeded via password — a hang, a crash that takes down the stack, a PAM
 return code that stops the fallback — treat that as equally serious. Locking the
 owner out of their own machine is the failure this whole design is arranged to
 prevent.
+
+## Optional keyring credential storage
+
+The opt-in [keyring feature](KEYRING.md) stores an encrypted copy of the login
+password for later GNOME Keyring unlock. It requires an existing TPM-backed key
+and never uses Iris's plaintext-key fallback. The existing TPM seal is not
+PCR-bound: it does not protect against root or an attacker-controlled boot that
+can access the vault. Root can recover the password, and accepting a face match
+also entrusts that authentication path with access to the user's keyring.
+
+The root-only helper has no daemon-protocol endpoint; its private pipe is used
+by the optional GDM PAM adapter. Secret capture is delayed until session open,
+validated against the account password, and bound to local identity and the
+current password hash. Password changes invalidate old ciphertext. Disabling
+removes the active saved state; it cannot erase external backups or snapshots.

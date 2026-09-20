@@ -30,7 +30,7 @@ PAM_SECURITY_DIR=/usr/lib/x86_64-linux-gnu/security
 DOC_DIR=/usr/share/doc/iris
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
-WIRE_GDM=0; WIRE_SUDO=0; WIRE_POLKIT=0; DO_UNINSTALL=0; ASSUME_YES=0
+WIRE_KEYRING=0; WIRE_GDM=0; WIRE_SUDO=0; WIRE_POLKIT=0; DO_UNINSTALL=0; ASSUME_YES=0
 
 if [[ -t 1 ]]; then
   R=$'\e[31m'; G=$'\e[32m'; Y=$'\e[33m'; B=$'\e[34m'; DIM=$'\e[2m'; BOLD=$'\e[1m'; N=$'\e[0m'
@@ -49,6 +49,7 @@ usage() {
 
 Options:
   --gdm        Wire GDM login and the GNOME lock screen (edits /etc/pam.d/gdm-password)
+  --keyring    Add optional keyring hooks to GDM (implies --gdm; enable per user separately)
   --sudo       Wire terminal sudo                       (edits /etc/pam.d/sudo)
   --polkit     Wire polkit / pkexec dialogs             (edits /etc/pam.d/polkit-1)
   --all-pam    All three of the above
@@ -61,6 +62,7 @@ EOF
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --gdm) WIRE_GDM=1 ;;
+    --keyring) WIRE_KEYRING=1; WIRE_GDM=1 ;;
     --sudo) WIRE_SUDO=1 ;;
     --polkit) WIRE_POLKIT=1 ;;
     --all-pam) WIRE_GDM=1; WIRE_SUDO=1; WIRE_POLKIT=1 ;;
@@ -76,6 +78,82 @@ done
 
 # The user whose desktop this is; needed to enable the shell extension for them.
 TARGET_USER="${SUDO_USER:-}"
+
+strip_iris_pam_service() {
+  local f="$1"
+  [[ -e "$f" ]] || return 0
+  [[ -f "$f" && ! -L "$f" ]] || die "refusing unsafe PAM path: $f"
+  grep -Eq 'pam_iris(_keyring)?\.so' "$f" || return 0
+  local tmp
+  tmp="$(mktemp "$f.iris.remove.XXXXXX")"
+  if ! cp --preserve=all "$f" "$tmp" \
+      || ! sed -E '/pam_iris(_keyring)?\.so/d' "$f" > "$tmp" \
+      || ! mv -f "$tmp" "$f"; then
+    rm -f "$tmp"
+    die "could not remove Iris hooks from $f; binaries have not been removed"
+  fi
+}
+
+wire_keyring_service() {
+  local f="$PAM_DIR/gdm-password"
+  [[ -f "$f" && ! -L "$f" ]] || die "keyring requires a regular gdm-password PAM stack"
+  local tmp backup
+  tmp="$(mktemp "$f.iris.keyring.XXXXXX")"
+  if ! cp --preserve=all "$f" "$tmp"; then
+    rm -f "$tmp"
+    die "could not preserve GDM PAM metadata"
+  fi
+  if ! python3 - "$f" "$tmp" <<'PY'
+import re
+import sys
+from pathlib import Path
+source, target = map(Path, sys.argv[1:])
+original = source.read_text()
+lines = original.splitlines(keepends=True)
+auth = 'auth optional pam_iris_keyring.so\n'
+session = 'session optional pam_iris_keyring.so\n'
+existing = [line for line in lines if 'pam_iris_keyring.so' in line]
+if existing and (existing.count(auth) != 1 or existing.count(session) != 1 or len(existing) != 2):
+    raise SystemExit('unexpected or incomplete keyring hooks; refusing changes')
+base = [line for line in lines if line not in (auth, session)]
+def exactly_one(pattern):
+    matches = [i for i, line in enumerate(base) if re.fullmatch(pattern, line.strip())]
+    if len(matches) != 1:
+        raise SystemExit('unsupported GDM PAM layout; refusing changes')
+    return matches[0]
+face = exactly_one(r'auth\s+\[success=done\s+default=ignore\]\s+pam_iris\.so(?:\s+.*)?')
+password = exactly_one(r'@include\s+common-auth')
+gkr_auth = exactly_one(r'auth\s+optional\s+pam_gnome_keyring\.so')
+gkr_session = exactly_one(r'session\s+optional\s+pam_gnome_keyring\.so\s+auto_start')
+if not face < password < gkr_auth < gkr_session:
+    raise SystemExit('unsupported PAM order; refusing changes')
+result = ''
+for i, line in enumerate(base):
+    if i == gkr_session:
+        result += session
+    result += line
+    if i == password:
+        result += auth
+if existing and original != result:
+    raise SystemExit('keyring hooks have unexpected placement; refusing changes')
+target.write_text(result)
+PY
+  then
+    rm -f "$tmp"
+    die "GDM keyring configuration was not changed"
+  fi
+  if cmp -s "$tmp" "$f"; then
+    rm -f "$tmp"
+    ok "optional GDM keyring hooks already installed"
+    return 0
+  fi
+  backup="$(mktemp "$BACKUP_DIR/gdm-password.keyring.$STAMP.XXXXXX")"
+  if ! cp --preserve=all "$f" "$backup" || ! mv -f "$tmp" "$f"; then
+    rm -f "$tmp"
+    die "could not install optional keyring hooks; backup: $backup"
+  fi
+  ok "optional GDM keyring hooks installed; enable separately with sudo iris keyring enable"
+}
 
 # ---------------------------------------------------------------------------
 # Uninstall
@@ -115,6 +193,12 @@ if [[ $DO_UNINSTALL -eq 1 ]]; then
       fi
     fi
   done
+  # Backups from upgrades can themselves contain Iris hooks. Remove both
+  # modules after restoration, before deleting either binary.
+  for svc in gdm-password sudo polkit-1 common-auth; do
+    strip_iris_pam_service "/etc/pam.d/$svc"
+  done
+  rm -rf "$STATE_DIR/keyring"
   if [[ -f /usr/share/pam-configs/iris ]]; then
     rm -f /usr/share/pam-configs/iris
     DEBIAN_FRONTEND=noninteractive pam-auth-update --package --remove iris 2>/dev/null || true
@@ -143,6 +227,7 @@ if [[ $DO_UNINSTALL -eq 1 ]]; then
   ok "daemon stopped and unit removed"
 
   rm -f "$PAM_SECURITY_DIR/pam_iris.so" /usr/lib/security/pam_iris.so
+  rm -f "$PAM_SECURITY_DIR/pam_iris_keyring.so" /usr/lib/security/pam_iris_keyring.so
   rm -f /usr/bin/iris /usr/bin/iris-settings /usr/sbin/irisd
   rm -rf "$PREFIX_LIB" "$PREFIX_SHARE" "$EXT_DIR" "$DOC_DIR"
   rm -f /usr/share/polkit-1/actions/org.iris.policy
@@ -164,6 +249,15 @@ fi
 # Preflight
 # ---------------------------------------------------------------------------
 step "Preflight"
+
+if [[ $WIRE_KEYRING -eq 1 ]]; then
+  [[ -x /usr/bin/gnome-keyring-daemon ]] || die "install gnome-keyring before using --keyring"
+  [[ -f "$PAM_SECURITY_DIR/pam_gnome_keyring.so" ]] || die "install libpam-gnome-keyring before using --keyring"
+  [[ -c /dev/tpmrm0 ]] || die "optional keyring auto-unlock requires a TPM"
+  for tool in tpm2_load tpm2_unseal tpm2_createprimary; do
+    [[ -x "/usr/bin/$tool" ]] || die "install tpm2-tools before using --keyring"
+  done
+fi
 
 command -v python3 >/dev/null || die "python3 not found"
 PYVER="$(python3 -c 'import sys;print("%d.%d"%sys.version_info[:2])')"
@@ -360,7 +454,11 @@ if command -v ldd >/dev/null; then
 fi
 install -d -m 0755 "$PAM_SECURITY_DIR"
 install -m 0644 "$SRC_DIR/pam/pam_iris.so" "$PAM_SECURITY_DIR/pam_iris.so"
-ok "pam_iris.so -> $PAM_SECURITY_DIR (no undefined symbols)"
+if ldd -r "$SRC_DIR/pam/pam_iris_keyring.so" 2>&1 | grep -q 'undefined symbol'; then
+  die "pam_iris_keyring.so has undefined symbols — refusing to install it"
+fi
+install -m 0644 "$SRC_DIR/pam/pam_iris_keyring.so" "$PAM_SECURITY_DIR/pam_iris_keyring.so"
+ok "PAM modules -> $PAM_SECURITY_DIR (no undefined symbols)"
 
 # ---------------------------------------------------------------------------
 # Daemon
@@ -604,6 +702,7 @@ if [[ $((WIRE_GDM + WIRE_SUDO + WIRE_POLKIT)) -gt 0 ]]; then
   fi
   selftest_module
   if [[ $WIRE_GDM    -eq 1 ]]; then wire_service gdm-password "GDM login + lock screen"; fi
+  if [[ $WIRE_KEYRING -eq 1 ]]; then wire_keyring_service; fi
   if [[ $WIRE_SUDO   -eq 1 ]]; then wire_service sudo         "terminal sudo"; fi
   if [[ $WIRE_POLKIT -eq 1 ]]; then wire_service polkit-1     "polkit dialogs"; fi
 else

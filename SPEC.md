@@ -95,3 +95,17 @@ Read with `tomllib`. Writing: hand-rolled flat emitter (schema is 2 levels, str/
 3. It MUST enforce a hard wall-clock timeout and never block a login shell indefinitely.
 4. Rate limit: max_failures within lockout_seconds -> reason "lockout".
 5. Password auth must remain functional at every touched point.
+
+## Optional GNOME Keyring integration
+
+`pam_iris` may record a per-handle username marker `iris.face_authenticated.v1`
+after a valid face success for `gdm-password`; every new attempt clears it. The
+optional `pam_iris_keyring.so` handles password capture after common-auth and
+credential delivery before pam_gnome_keyring's session hook. Both added PAM
+rules are `optional`; every failure preserves the existing password/login path.
+
+`iris keyring enable|disable|status [--user USER]` manages per-user opt-in state.
+A root-only bounded helper `iris/keyring.py capture|unlock USER` carries secrets
+only through private stdin/stdout pipes, never the daemon JSON API. The vault
+requires an existing TPM-backed Iris master key with no plaintext fallback.
+See `docs/KEYRING.md` for identity binding, password invalidation, and trust limits.

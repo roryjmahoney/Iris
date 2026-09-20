@@ -127,8 +127,9 @@
  *
  *  MEMORY AND PARSING SAFETY
  *  -------------------------
- *  No heap allocation at all: every buffer is a bounded automatic array, so
- *  there is no allocation failure path and nothing to leak or double-free.
+ *  Protocol buffers are bounded automatic arrays. The optional keyring marker
+ *  is a heap copy of the validated username, owned and cleaned up by PAM;
+ *  allocation failure never changes the face-authentication result.
  *  No strcpy/strcat/sprintf/gets anywhere; only snprintf with checked return
  *  values, memcpy with pre-verified bounds, and explicit length tracking.
  *  The JSON reply is parsed by a hand-rolled scanner that never writes and
@@ -177,6 +178,7 @@
 
 #include <security/pam_ext.h>
 #include <security/pam_modules.h>
+#include "iris_pam_state.h"
 
 /* -------------------------------------------------------------------------
  * Tunables and hard limits.  All buffers are sized from these; none of them
@@ -185,7 +187,11 @@
  * ------------------------------------------------------------------------- */
 
 /* Contract: SPEC.md "Paths" — root:root 0600 SOCK_STREAM. */
+#ifdef IRIS_PAM_TEST_SOCKET
+#define IRIS_SOCKET_PATH IRIS_PAM_TEST_SOCKET
+#else
 #define IRIS_SOCKET_PATH "/run/irisd/socket"
+#endif
 
 #define IRIS_DEFAULT_TIMEOUT_MS 8000L /* SPEC auth.timeout default of 8.0 s */
 #define IRIS_MIN_TIMEOUT_MS 1000L
@@ -1046,6 +1052,9 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
 	 */
 	int rv = PAM_AUTH_ERR;
 
+	/* Invalidate prior attempts even if this attempt exits before user lookup. */
+	iris_clear_data(pamh, IRIS_FACE_DATA);
+	iris_clear_data(pamh, IRIS_CAPTURE_DATA);
 	parse_args(pamh, argc, argv, &o);
 
 	/*
@@ -1174,6 +1183,14 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
 		 * well-formed reply carrying a top-level "ok":true.
 		 */
 		rv = PAM_SUCCESS;
+		const void *service = NULL;
+		if (pam_get_item(pamh, PAM_SERVICE, &service) == PAM_SUCCESS &&
+		    service && strcmp(service, "gdm-password") == 0) {
+			char *marker = strdup(user);
+			if (marker && pam_set_data(pamh, IRIS_FACE_DATA, marker,
+			                         iris_free_string) != PAM_SUCCESS)
+				iris_free_string(pamh, marker, 0);
+		}
 		if (o.debug)
 			pam_syslog(pamh, LOG_DEBUG, "face authentication succeeded for '%s'",
 				   user);

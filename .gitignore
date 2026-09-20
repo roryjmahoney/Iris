@@ -34,6 +34,7 @@ pip-wheel-metadata/
 *.o
 *.a
 pam/pam_iris.so
+pam/pam_iris_keyring.so
 extension/iris@local/schemas/gschemas.compiled
 
 # Generated visual-review frames

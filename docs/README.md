@@ -10,6 +10,7 @@ Start with [Installation](INSTALLATION.md), then keep
 | Document | Use it for |
 |---|---|
 | [Installation](INSTALLATION.md) | Ubuntu packages, installation, PAM opt-in, shell integration, removal |
+| [Keyring auto-unlock](KEYRING.md) | Optional TPM-backed unlock, setup, disabling, and trust boundaries |
 | [Configuration](CONFIGURATION.md) | Supported settings, defaults, ranges, and result codes |
 | [Hardware](HARDWARE.md) | Selecting an IR capture node and understanding strobing |
 | [Troubleshooting](TROUBLESHOOTING.md) | Diagnosing camera, daemon, PAM, extension, TPM, and lockout failures |

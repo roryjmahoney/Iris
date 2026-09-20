@@ -61,8 +61,8 @@ CHECKFLAGS ?= -fsyntax-only -Werror -Wall -Wextra -Wshadow -Wconversion \
               -Wsign-conversion -Wcast-qual -Wformat=2 -Wstrict-prototypes \
               -Wmissing-prototypes -Wvla
 
-TARGET  := pam_iris.so
-SOURCES := pam_iris.c
+TARGET  := pam_iris.so pam_iris_keyring.so
+SOURCES := pam_iris.c pam_iris_keyring.c
 
 # Multiarch security directory for x86_64 Debian/Ubuntu.  Override for another
 # architecture, e.g.  make install SECDIR=/usr/lib/aarch64-linux-gnu/security
@@ -78,9 +78,9 @@ PAMD_HINT := /etc/pam.d/common-auth
 
 all: $(TARGET)
 
-$(TARGET): $(SOURCES)
+$(TARGET): %.so: %.c iris_pam_state.h
 	$(CC) $(CFLAGS) $(REQUIRED_CFLAGS) $(LDFLAGS) $(REQUIRED_LDFLAGS) \
-	    -o $@ $(SOURCES) $(LDLIBS)
+	    -o $@ $< $(LDLIBS)
 	@# A PAM module that dlopen()s with an unresolved symbol is discovered
 	@# at the worst possible moment.  Prove it is clean here instead.
 	@if command -v ldd >/dev/null 2>&1; then \
@@ -102,7 +102,7 @@ install: $(TARGET)
 	    exit 1; \
 	}
 	install -d -m 0755 $(DESTDIR)$(SECDIR)
-	install -m 0644 -o root -g root $(TARGET) $(DESTDIR)$(SECDIR)/$(TARGET)
+	install -m 0644 -o root -g root $(TARGET) $(DESTDIR)$(SECDIR)/
 	@echo
 	@echo "Installed $(DESTDIR)$(SECDIR)/$(TARGET)"
 	@echo "It is NOT active until it is stacked.  Add to $(PAMD_HINT),"
@@ -118,7 +118,7 @@ uninstall:
 	    echo "uninstall: must be run as root (try: sudo make uninstall)" >&2; \
 	    exit 1; \
 	}
-	rm -f $(DESTDIR)$(SECDIR)/$(TARGET)
+	rm -f $(addprefix $(DESTDIR)$(SECDIR)/,$(TARGET))
 	@echo "Removed $(DESTDIR)$(SECDIR)/$(TARGET)."
 	@echo "Remove the pam_iris.so line from $(PAMD_HINT) as well:"
 	@echo "PAM logs 'module unknown' and ignores it, but leaving dead"
