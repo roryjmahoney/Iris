@@ -59,6 +59,14 @@ class EncodeDecodeTests(unittest.TestCase):
             with self.subTest(line=line), self.assertRaises(MalformedMessage):
                 protocol.decode_message(line)
 
+    def test_decode_rejects_non_json_constants(self) -> None:
+        # Python's json accepts these by default; the wire format does not.
+        for line in (b'{"x":NaN}\n', b'{"x":Infinity}\n', b'{"x":-Infinity}\n',
+                     b'{"config":{"recognition":{"threshold":NaN}}}\n'):
+            with self.subTest(line=line), self.assertRaises(MalformedMessage):
+                protocol.decode_message(line)
+        self.assertEqual(protocol.decode_message(b'{"x":"NaN"}\n'), {"x": "NaN"})
+
     def test_decode_tolerates_crlf(self) -> None:
         self.assertEqual(protocol.decode_message(b'{"ok":true}\r\n'), {"ok": True})
 
@@ -107,9 +115,11 @@ class FramingTests(unittest.TestCase):
             protocol.read_message(self.b)
 
     def test_malformed_line_over_the_wire(self) -> None:
-        self.a.sendall(b"{oops}\n")
-        with self.assertRaises(MalformedMessage):
-            protocol.read_message(self.b)
+        for line in (b"{oops}\n", b'{"timeout":Infinity}\n'):
+            with self.subTest(line=line):
+                self.a.sendall(line)
+                with self.assertRaises(MalformedMessage):
+                    protocol.read_message(self.b)
 
     def test_size_cap_on_read(self) -> None:
         exact = protocol.encode_message(_padded(MAX_MESSAGE_BYTES))

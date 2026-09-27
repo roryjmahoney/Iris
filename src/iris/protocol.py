@@ -171,7 +171,9 @@ def decode_message(line: bytes | bytearray) -> dict[str, Any]:
     except UnicodeDecodeError as exc:
         raise MalformedMessage(f"message is not valid UTF-8: {exc}") from exc
     try:
-        obj = json.loads(text)
+        # NaN/Infinity are not JSON, and encode_message refuses to send them;
+        # refuse them on the way in too rather than hand them to a handler.
+        obj = json.loads(text, parse_constant=_reject_constant)
     except json.JSONDecodeError as exc:
         raise MalformedMessage(f"message is not valid JSON: {exc}") from exc
     if not isinstance(obj, dict):
@@ -419,6 +421,11 @@ def describe_reason(reason: str) -> str:
 # --------------------------------------------------------------------------
 # internals
 # --------------------------------------------------------------------------
+
+def _reject_constant(name: str) -> Any:
+    """``json.loads`` hook: fail on the non-standard NaN/Infinity literals."""
+    raise MalformedMessage(f"message contains the non-JSON constant {name}")
+
 
 def _require_timeout(sock: socket.socket) -> None:
     """Reject sockets that could block forever or would raise on a partial read.

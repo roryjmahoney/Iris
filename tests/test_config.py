@@ -267,7 +267,8 @@ class DaemonAgreementTests(unittest.TestCase):
         # replaced by its default on the next load. The two must agree.
         from iris.daemon import _same_kind
 
-        samples = [True, False, 0, 7, -1, 2.5, 8.0, "", "text"]
+        samples = [True, False, 0, 7, -1, 2.5, 8.0, "", "text",
+                   float("nan"), float("inf"), float("-inf")]
         for section, values in DEFAULTS.items():
             for key, default in values.items():
                 for value in samples:
