@@ -888,7 +888,9 @@ def _clamp01(value: Any) -> float:
 def _as_int(value: Any) -> int | None:
     try:
         return int(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
+        # OverflowError: int(float("inf")). Python's json accepts Infinity, and
+        # an exception here would kill the stdout reader thread mid-enrolment.
         return None
 
 
