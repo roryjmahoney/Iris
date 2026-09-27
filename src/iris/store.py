@@ -1013,9 +1013,9 @@ class FailureTracker:
     #: SAFETY: this is also a hard ceiling on an *effective* ``auth.max_failures``.
     #: ``failure_count()`` can never exceed this, so a configured value above it
     #: would make ``is_locked()`` permanently false and disable rate limiting
-    #: without any error.  ``cli._RANGES["auth.max_failures"]`` is clamped to the
-    #: same number so that configuration is unreachable; raise both together or
-    #: neither.
+    #: without any error.  ``iris.cli.settings._RANGES["auth.max_failures"]`` is
+    #: clamped to the same number so that configuration is unreachable; raise
+    #: both together or neither.
     _MAX_HISTORY: Final[int] = 64
 
     def __init__(self, max_users: int = 1024) -> None:
