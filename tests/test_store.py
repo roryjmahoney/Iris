@@ -112,6 +112,9 @@ class KeyManagerTests(_RootStoreCase):
         self.assertEqual(KeyManager(self.root, use_tpm=False).load_key(), key)
 
     def test_key_creation_requires_root(self) -> None:
+        # Pre-create the directory so the key-creation guard itself is tested,
+        # not the directory-creation one.
+        store.ensure_root_dir(self.root)
         with mock.patch.object(store.os, "geteuid", return_value=1000):
             with self.assertRaises(PermissionError):
                 self.keys.load_key()
@@ -204,9 +207,13 @@ class TemplateStoreRoundTripTests(_RootStoreCase):
         self.assertEqual(self.store.enrolled_users(), ["bob"])
 
     def test_writes_require_root(self) -> None:
+        # Directory and key already exist, so only _write()'s own guard stands
+        # between a non-root caller and the template file.
+        self.keys.load_key()
         with mock.patch.object(store.os, "geteuid", return_value=1000):
             with self.assertRaises(PermissionError):
                 self.store.add("alice", "default", [_vec(1)])
+        self.assertFalse(self.store.has_user("alice"))
 
     def test_face_limit_is_enforced(self) -> None:
         for i in range(store.MAX_FACES_PER_USER):

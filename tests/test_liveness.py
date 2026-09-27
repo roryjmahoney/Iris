@@ -223,10 +223,18 @@ class MeasurementTests(unittest.TestCase):
                 self.assertEqual(_checker().measure(converted, FACE_ROW), expected)
 
     def test_wide_dtypes_are_clipped_not_rescaled(self) -> None:
-        frame = _live(1).astype(np.float64)
-        frame[REGION][0, 0] = 1000.0
-        stats = _checker().measure(frame, FACE_ROW)
-        self.assertGreater(stats["saturated"], 0.0)
+        gray = _live(1)
+        wide = gray.astype(np.float64)
+        wide[REGION][0, 0] = 1000.0
+        wide[0, 0] = -50.0
+        clipped = gray.copy()
+        clipped[REGION][0, 0] = 255
+        clipped[0, 0] = 0
+        # Every ordinary level must survive unchanged; only out-of-range
+        # pixels move, so the statistics match a pre-clipped uint8 frame.
+        self.assertEqual(
+            _checker().measure(wide, FACE_ROW), _checker().measure(clipped, FACE_ROW)
+        )
 
     def test_malformed_frames_raise(self) -> None:
         checker = _checker()
