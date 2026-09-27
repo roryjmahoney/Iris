@@ -6,6 +6,7 @@ import unittest
 from unittest import mock
 
 from iris import cli
+from iris.cli import common, status
 
 
 class KeyringCliTests(unittest.TestCase):
@@ -13,9 +14,9 @@ class KeyringCliTests(unittest.TestCase):
         vault = types.SimpleNamespace(KeyringError=RuntimeError, enable=mock.Mock(return_value={'user': 'alice', 'state': 'pending-password-login'}))
         output = io.StringIO()
         with mock.patch('iris.keyring', vault, create=True), \
-             mock.patch.object(cli, 'require_root'), \
-             mock.patch.object(cli, 'resolve_user', return_value='alice'), \
-             mock.patch.object(cli, '_require_keyring_hooks') as hooks, redirect_stdout(output):
+             mock.patch.object(status, 'require_root'), \
+             mock.patch.object(status, 'resolve_user', return_value='alice'), \
+             mock.patch.object(status, '_require_keyring_hooks') as hooks, redirect_stdout(output):
             self.assertEqual(cli.main(['keyring', 'enable', '--user', 'alice', '--json']), 0)
         hooks.assert_called_once_with()
         vault.enable.assert_called_once_with('alice')
@@ -24,13 +25,13 @@ class KeyringCliTests(unittest.TestCase):
     def test_disable_does_not_depend_on_installed_hooks(self):
         vault = types.SimpleNamespace(KeyringError=RuntimeError, disable=mock.Mock(return_value={'user': 'alice', 'state': 'disabled'}))
         with mock.patch('iris.keyring', vault, create=True), \
-             mock.patch.object(cli, 'require_root'), \
-             mock.patch.object(cli, 'resolve_user', return_value='alice'), \
-             mock.patch.object(cli, '_require_keyring_hooks') as hooks, redirect_stdout(io.StringIO()):
+             mock.patch.object(status, 'require_root'), \
+             mock.patch.object(status, 'resolve_user', return_value='alice'), \
+             mock.patch.object(status, '_require_keyring_hooks') as hooks, redirect_stdout(io.StringIO()):
             self.assertEqual(cli.main(['keyring', 'disable']), 0)
         hooks.assert_not_called()
         vault.disable.assert_called_once_with('alice')
 
     def test_unprivileged_commands_do_not_touch_vault(self):
-        with mock.patch.object(cli.os, 'geteuid', return_value=1000), redirect_stdout(io.StringIO()):
+        with mock.patch.object(common.os, 'geteuid', return_value=1000), redirect_stdout(io.StringIO()):
             self.assertEqual(cli.main(['keyring', 'status', '--json']), cli.EXIT_PERMISSION)
