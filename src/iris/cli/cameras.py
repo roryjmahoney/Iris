@@ -9,15 +9,16 @@ from typing import Any
 from iris import protocol
 
 from iris.cli.common import _failure_text, daemon_request, render_table
-from iris.cli.constants import CONTROL_TIMEOUT, EXIT_OK
+from iris.cli.constants import CONTROL_TIMEOUT, EXIT_OK, PROG
 from iris.cli.output import CommandError, console
-from iris.cli.settings import load_effective_config
+from iris.cli.settings import is_auto_device, load_effective_config, resolve_configured_device
 
 
 def cmd_cameras(args: argparse.Namespace) -> int:
     cameras, source = _collect_cameras(args.socket)
     cfg, _cfg_source = load_effective_config(args.socket)
     configured = str(cfg["camera"]["device"])
+    active = resolve_configured_device(configured) if cameras else None
 
     if args.json:
         console.print(json.dumps(cameras, indent=2))
@@ -41,7 +42,7 @@ def cmd_cameras(args: argparse.Namespace) -> int:
             hidden += 1
             continue
         path = str(camera.get("path", "?"))
-        marker = "*" if path == configured else " "
+        marker = "*" if path == active else " "
         if camera.get("is_metadata"):
             kind = "metadata"
         elif camera.get("is_ir"):
@@ -69,7 +70,12 @@ def cmd_cameras(args: argparse.Namespace) -> int:
             console.print(line)
 
     console.print()
-    console.note(f"* = camera.device from the configuration ({configured})")
+    if is_auto_device(configured):
+        chosen = active or "none found"
+        console.note(f"* = the camera Iris uses (camera.device = auto → {chosen})")
+        console.note(f"to pin a different one:  sudo {PROG} config set camera.device /dev/videoN")
+    else:
+        console.note(f"* = camera.device from the configuration ({configured})")
     if hidden:
         plural = "node" if hidden == 1 else "nodes"
         console.note(
@@ -84,8 +90,11 @@ def cmd_cameras(args: argparse.Namespace) -> int:
             "no infrared camera was detected; face authentication on a colour "
             "camera can be defeated with a printed photograph"
         )
-    elif not any(c.get("path") == configured for c in cameras):
-        console.warn(f"the configured device {configured} is not present")
+    elif not is_auto_device(configured) and not any(c.get("path") == configured for c in cameras):
+        console.warn(
+            f"the configured device {configured} is not present; "
+            f"use  sudo {PROG} config set camera.device auto  to pick the infrared camera"
+        )
     return EXIT_OK
 
 

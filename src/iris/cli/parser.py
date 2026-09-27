@@ -14,6 +14,7 @@ from iris.cli.config_cmd import cmd_config, cmd_config_set_all
 from iris.cli.constants import ENROLL_TIMEOUT, PROG
 from iris.cli.doctor import cmd_doctor
 from iris.cli.faces import cmd_clear, cmd_enroll, cmd_list, cmd_remove
+from iris.cli.hardware import cmd_hardware_report
 from iris.cli.status import cmd_keyring, cmd_status
 
 
@@ -24,6 +25,7 @@ examples:
   sudo {PROG} list                       show what is enrolled
   sudo {PROG} test                       run one real authentication, timed
   {PROG} cameras                         list the video devices
+  {PROG} hardware-report                 describe this laptop's camera for a bug report
   {PROG} config                          print the whole configuration
   sudo {PROG} config set recognition.threshold 0.5
   {PROG} doctor                          diagnose a broken installation
@@ -139,6 +141,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     cameras.add_argument("--json", action="store_true", help="machine-readable output")
     cameras.set_defaults(func=cmd_cameras)
+
+    report = subparsers.add_parser(
+        "hardware-report", help="describe the camera hardware for a GitHub issue",
+        description=(
+            "Print a Markdown report of this machine's cameras and IR emitter, "
+            "ready to paste into a hardware issue. Contains no images, serial "
+            "numbers, user names or host names."
+        ),
+    )
+    report.add_argument("--device", metavar="PATH", help="sample this node instead of camera.device")
+    report.add_argument(
+        "--seconds", type=float, default=3.0, metavar="N",
+        help="how long to sample the emitter (default: 3)",
+    )
+    report.add_argument("--no-capture", action="store_true", help="do not open the camera at all")
+    report.add_argument("--json", action="store_true", help="machine-readable output")
+    report.set_defaults(func=cmd_hardware_report)
 
     config_parser = subparsers.add_parser(
         "config", help="get or set settings",

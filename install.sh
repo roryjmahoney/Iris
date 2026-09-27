@@ -276,8 +276,21 @@ for m in face_detection_yunet_2023mar.onnx face_recognition_sface_2021dec.onnx; 
 done
 ok "ONNX models present"
 
-[[ -e /dev/video0 || -e /dev/video2 ]] || warn "No /dev/video* found — enrolment will fail until a camera exists"
-if [[ -e /dev/video2 ]]; then ok "camera nodes present (/dev/video2 expected to be IR)"; fi
+# Which node is the IR camera differs between laptops, so ask the kernel
+# rather than assume. camera.device defaults to "auto", which makes the same
+# choice at run time; this is only so the user sees it now.
+IR_CAMERA="$(PYTHONPATH="$SRC_DIR/src" python3 -c '
+from iris.camera import default_ir_camera
+cam = default_ir_camera()
+print(cam["path"] + " (" + cam["name"] + ")" if cam else "")
+' 2>/dev/null || true)"
+if [[ -n "$IR_CAMERA" ]]; then
+  ok "infrared camera: $IR_CAMERA"
+elif compgen -G "/dev/video*" >/dev/null; then
+  warn "no infrared camera recognised — see step 1 of \"Next steps\" at the end"
+else
+  warn "no /dev/video* devices — enrolment will fail until a camera is available"
+fi
 
 command -v gcc >/dev/null || die "gcc missing. Install: sudo apt install build-essential"
 [[ -f /usr/include/security/pam_modules.h ]] || die "PAM headers missing. Install: sudo apt install libpam0g-dev"
@@ -717,9 +730,16 @@ cat <<EOF
 
   ${BOLD}Next steps${N}
 
-    1. Enrol your face:        ${B}sudo iris enroll${N}
-    2. Check it recognises you:${B} iris test${N}
-    3. Full health check:      ${B}iris doctor${N}
+    1. Check Iris found your infrared camera:   ${B}iris cameras${N}
+       The row marked ${B}infrared${N} with a * is the one Iris will use
+       (camera.device = auto)${IR_CAMERA:+ — detected now: ${B}$IR_CAMERA${N}}.
+       Then confirm its IR light works:          ${B}iris doctor${N}
+         • To use a different node:  ${B}sudo iris config set camera.device /dev/videoN${N}
+         • IR camera missing, or its light never turns on?  Run
+           ${B}iris hardware-report${N} and paste the output into a hardware issue:
+           ${B}https://github.com/roryjmahoney/Iris/issues/new?template=hardware_report.yml${N}
+    2. Enrol your face:        ${B}sudo iris enroll${N}
+    3. Check it recognises you:${B} iris test${N}
     4. Settings app:           ${B}iris-settings${N}
 EOF
 if [[ -d "$EXT_DIR" ]] && [[ -n "$TARGET_USER" ]]; then

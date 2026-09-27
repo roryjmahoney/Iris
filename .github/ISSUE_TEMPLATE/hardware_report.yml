@@ -1,0 +1,54 @@
+name: Hardware report
+description: Tell us whether Iris works with your laptop's infrared camera.
+title: "[hardware] <laptop model>: <works / partly works / does not work>"
+labels: ["hardware"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping Iris support more laptops! Nobody on the project owns your
+        hardware, so your report is what makes support possible.
+
+        Run this in a terminal and paste the whole output below. It contains **no
+        images, serial numbers, user names or host names**:
+
+        ```
+        iris hardware-report
+        ```
+  - type: dropdown
+    id: status
+    attributes:
+      label: Does face authentication work?
+      options:
+        - "Yes, it works"
+        - "Partly (e.g. slow, unreliable, only in some light)"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Output of `iris hardware-report`
+      description: Paste everything it printed.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: >-
+        What did you try (for example `iris doctor`, `sudo iris enroll`,
+        `sudo iris test`), and what did you see? Does the IR light visibly
+        flicker (a phone camera can often see it)?
+    validations:
+      required: false
+  - type: textarea
+    id: changes
+    attributes:
+      label: Anything you changed to get it working?
+      description: >-
+        For example `camera.device`, `camera.min_frame_brightness`, or a tool
+        such as linux-enable-ir-emitter.
+    validations:
+      required: false

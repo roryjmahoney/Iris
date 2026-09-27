@@ -1,0 +1,40 @@
+name: Bug report
+description: Something in Iris is broken or behaves unexpectedly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the problem is that your camera is not found or does not work, please use
+        the **Hardware report** form instead.
+
+        **Never paste passwords, keys, or anything from `/var/lib/iris`.**
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `iris doctor`
+      render: text
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: For example `journalctl -u irisd -n 100 --no-pager`.
+      render: text
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Iris version
+      description: Output of `iris --version`.
+    validations:
+      required: false

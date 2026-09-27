@@ -39,7 +39,7 @@ CONFIG_PATH: Final[str] = "/etc/iris/config.toml"
 #: against the type of its counterpart here before being accepted.
 DEFAULTS: Final[dict[str, dict[str, Any]]] = {
     "camera": {
-        "device": "/dev/video2",
+        "device": "auto",
         "width": 640,
         "height": 360,
         "ir_mode": True,

@@ -34,7 +34,7 @@ sudo systemctl restart irisd
 
 | Key | Type | Default | Accepted range | Purpose |
 |---|---|---:|---:|---|
-| `device` | string | `/dev/video2` | — | V4L2 IR capture node; metadata nodes are refused |
+| `device` | string | `auto` | — | `auto` picks the first infrared capture node; or a V4L2 node such as `/dev/video2`. Metadata nodes are refused |
 | `width` | integer | `640` | 1–8192 | Requested capture width |
 | `height` | integer | `360` | 1–8192 | Requested capture height |
 | `ir_mode` | boolean | `true` | — | Request GREY capture and discard dark strobe frames |
