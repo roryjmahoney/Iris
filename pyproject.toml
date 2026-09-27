@@ -6,7 +6,7 @@
 
 [project]
 name = "iris"
-version = "1.0.0"
+version = "0.2.1"
 description = "Local infrared face authentication for Ubuntu, GNOME, and Wayland"
 readme = "README.md"
 requires-python = ">=3.11"
