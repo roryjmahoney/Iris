@@ -340,76 +340,194 @@ static ptrdiff_t json_string_end(const char *b, size_t len, size_t i)
  * would turn a structurally broken frame into a *successful authentication*.
  * A gate that only holds while everything upstream is correct is not a gate.
  *
- * So: the whole line must validate as one balanced object before its "ok" is
- * allowed to mean anything.  This restores the property the file header
- * claims — "refuses anything it does not fully understand" — rather than
- * merely describing it.
+ * So: the whole line must validate as one JSON object — full grammar, not
+ * just balanced brackets — before its "ok" is allowed to mean anything.  A
+ * bracket-only check was not enough: {"x":1 "ok":true}, {"ok":true,} and
+ * {,"ok":true} all balance, and were verified to authenticate.  This restores
+ * the property the file header claims — "refuses anything it does not fully
+ * understand" — rather than merely describing it.
  *
- * Bounded and non-recursive: one forward pass, an integer depth counter with
- * an explicit ceiling, and no writes.  Returns true only for a single object.
+ * Bounded and non-recursive: one forward pass, a fixed per-level stack with
+ * an explicit depth ceiling, and no writes.  Returns true only for a single
+ * object.
  */
 #define IRIS_MAX_JSON_DEPTH 16
+
+/* True if the byte at *i* legitimately terminates a bare JSON literal. */
+static bool json_token_ends(const char *b, size_t len, size_t i)
+{
+	if (i >= len)
+		return true; /* end of the framed line */
+	return b[i] == ',' || b[i] == '}' || b[i] == ']' || json_is_ws(b[i]);
+}
+
+/*
+ * End of the bare JSON token (number or true/false/null) starting at *i*, or 0
+ * if it is not one.  Numbers follow RFC 8259 exactly: an optional minus, no
+ * leading zeros, and digits required on both sides of '.' and after 'e'.
+ */
+static size_t json_scalar_end(const char *b, size_t len, size_t i)
+{
+	static const char *const literals[] = {"true", "false", "null"};
+	size_t j = i;
+
+	for (size_t k = 0; k < sizeof(literals) / sizeof(literals[0]); k++) {
+		size_t l = strlen(literals[k]);
+
+		if (i + l <= len && memcmp(b + i, literals[k], l) == 0)
+			return json_token_ends(b, len, i + l) ? i + l : 0;
+	}
+
+	if (j < len && b[j] == '-')
+		j++;
+	if (j >= len || b[j] < '0' || b[j] > '9')
+		return 0;
+	if (b[j] == '0')
+		j++;
+	else
+		while (j < len && b[j] >= '0' && b[j] <= '9')
+			j++;
+	if (j < len && b[j] == '.') {
+		size_t digits = ++j;
+
+		while (j < len && b[j] >= '0' && b[j] <= '9')
+			j++;
+		if (j == digits)
+			return 0;
+	}
+	if (j < len && (b[j] == 'e' || b[j] == 'E')) {
+		size_t digits;
+
+		j++;
+		if (j < len && (b[j] == '+' || b[j] == '-'))
+			j++;
+		digits = j;
+		while (j < len && b[j] >= '0' && b[j] <= '9')
+			j++;
+		if (j == digits)
+			return 0;
+	}
+	return json_token_ends(b, len, j) ? j : 0;
+}
+
+/* What the validator expects next inside the innermost open container. */
+enum json_expect {
+	JX_KEY_OR_END,   /* just after '{' */
+	JX_KEY,          /* after ',' in an object */
+	JX_COLON,        /* after a key */
+	JX_VALUE,        /* after ':' or after ',' in an array */
+	JX_VALUE_OR_END, /* just after '[' */
+	JX_COMMA_OR_END  /* after a complete member or element */
+};
 
 static bool json_line_is_object(const char *b, size_t len)
 {
 	/*
-	 * A fixed-size stack of the open bracket *types*, not just a counter.
-	 * A plain depth counter treats `]` as closing a `{`, which accepts
-	 * `{"ok":true]` — verified, and exactly the kind of near-miss frame a
-	 * truncated or buggy writer produces.  Bounded by the depth ceiling,
-	 * so it is an automatic array with no allocation.
+	 * A full grammar check, not just bracket balancing: a balanced line
+	 * such as {"x":1 "ok":true} or {"ok":true,} is not JSON, and must not
+	 * be allowed to authenticate merely because its brackets match.
+	 *
+	 * One forward pass, no recursion: a fixed stack holding, per open
+	 * container, whether it is an object and what may come next.  Bounded
+	 * by the depth ceiling, so it is an automatic array with no allocation.
 	 */
-	char open[IRIS_MAX_JSON_DEPTH];
+	bool is_object[IRIS_MAX_JSON_DEPTH];
+	enum json_expect expect[IRIS_MAX_JSON_DEPTH];
 	size_t i = 0;
 	int depth = 0;
-	bool closed = false; /* the outermost object has been closed */
 
 	while (i < len && json_is_ws(b[i]))
 		i++;
 	if (i >= len || b[i] != '{')
 		return false; /* must begin with an object */
+	is_object[0] = true;
+	expect[0] = JX_KEY_OR_END;
+	depth = 1;
+	i++;
 
-	for (; i < len; i++) {
-		char c = b[i];
+	while (depth > 0) {
+		enum json_expect *want;
+		char c;
 
-		if (c == '"') {
-			ptrdiff_t end = json_string_end(b, len, i);
+		while (i < len && json_is_ws(b[i]))
+			i++;
+		if (i >= len)
+			return false; /* truncated */
+		c = b[i];
+		want = &expect[depth - 1];
 
-			if (end < 0)
-				return false; /* unterminated string */
-			i = (size_t)end - 1; /* loop's i++ lands after it */
-			continue;
+		switch (*want) {
+		case JX_KEY_OR_END:
+		case JX_KEY:
+			if (c == '}' && *want == JX_KEY_OR_END) {
+				depth--;
+				i++;
+				break;
+			}
+			if (c != '"')
+				return false;
+			{
+				ptrdiff_t end = json_string_end(b, len, i);
+
+				if (end < 0)
+					return false;
+				i = (size_t)end;
+			}
+			*want = JX_COLON;
+			break;
+		case JX_COLON:
+			if (c != ':')
+				return false;
+			*want = JX_VALUE;
+			i++;
+			break;
+		case JX_VALUE_OR_END:
+		case JX_VALUE:
+			if (c == ']' && *want == JX_VALUE_OR_END) {
+				depth--;
+				i++;
+				break;
+			}
+			*want = JX_COMMA_OR_END;
+			if (c == '{' || c == '[') {
+				if (depth >= IRIS_MAX_JSON_DEPTH)
+					return false; /* absurdly nested: refuse */
+				is_object[depth] = (c == '{');
+				expect[depth] = (c == '{') ? JX_KEY_OR_END : JX_VALUE_OR_END;
+				depth++;
+				i++;
+			} else if (c == '"') {
+				ptrdiff_t end = json_string_end(b, len, i);
+
+				if (end < 0)
+					return false;
+				i = (size_t)end;
+			} else {
+				size_t end = json_scalar_end(b, len, i);
+
+				if (end == 0)
+					return false;
+				i = end;
+			}
+			break;
+		case JX_COMMA_OR_END:
+			if (c == ',') {
+				*want = is_object[depth - 1] ? JX_KEY : JX_VALUE;
+				i++;
+			} else if (c == (is_object[depth - 1] ? '}' : ']')) {
+				depth--;
+				i++;
+			} else {
+				return false; /* missing comma, or `{...]` */
+			}
+			break;
 		}
-		if (c == '{' || c == '[') {
-			if (closed)
-				return false; /* a second value after the object */
-			if (depth >= IRIS_MAX_JSON_DEPTH)
-				return false; /* absurdly nested: refuse */
-			open[depth++] = c;
-			continue;
-		}
-		if (c == '}' || c == ']') {
-			char want;
-
-			if (--depth < 0)
-				return false; /* unbalanced close */
-			want = (c == '}') ? '{' : '[';
-			if (open[depth] != want)
-				return false; /* `{...]` or `[...}` */
-			if (depth == 0)
-				closed = true;
-			continue;
-		}
-		/*
-		 * Outside a string, once the outermost object has closed the
-		 * only thing allowed is trailing whitespace.  This is what
-		 * rejects `{"ok":true} garbage` and `{"a":1},{"ok":true}`.
-		 */
-		if (closed && !json_is_ws(c))
-			return false;
 	}
 
-	return closed && depth == 0;
+	/* After the outermost object, only trailing whitespace is allowed. */
+	while (i < len && json_is_ws(b[i]))
+		i++;
+	return i == len;
 }
 
 /*
@@ -463,14 +581,6 @@ static ptrdiff_t json_find_member(const char *b, size_t len, const char *key)
 		i = (size_t)end - 1; /* resume after the string (loop adds 1) */
 	}
 	return -1;
-}
-
-/* True if the byte at *i* legitimately terminates a bare JSON literal. */
-static bool json_token_ends(const char *b, size_t len, size_t i)
-{
-	if (i >= len)
-		return true; /* end of the framed line */
-	return b[i] == ',' || b[i] == '}' || b[i] == ']' || json_is_ws(b[i]);
 }
 
 /*
@@ -637,11 +747,18 @@ static void parse_args(pam_handle_t *pamh, int argc, const char **argv,
 				continue;
 			}
 
-			long ms = (long)(secs * 1000.0);
-			if (ms < IRIS_MIN_TIMEOUT_MS)
+			/*
+			 * Clamp in floating point *before* converting: casting a
+			 * double outside long's range (timeout=1e300, inf) is
+			 * undefined behaviour, not a clamp.
+			 */
+			long ms;
+			if (secs * 1000.0 <= (double)IRIS_MIN_TIMEOUT_MS)
 				ms = IRIS_MIN_TIMEOUT_MS;
-			if (ms > IRIS_MAX_TIMEOUT_MS)
+			else if (secs * 1000.0 >= (double)IRIS_MAX_TIMEOUT_MS)
 				ms = IRIS_MAX_TIMEOUT_MS;
+			else
+				ms = (long)(secs * 1000.0);
 			/*
 			 * Clamping rather than rejecting: an admin typo must
 			 * not be able to configure an unbounded wait, and must
