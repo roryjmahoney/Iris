@@ -794,6 +794,20 @@ class ConfigOpsTests(_DaemonCase):
         self.assertEqual(self.config_path.read_text(), before)
         self.assertFalse(self.daemon._dispatch({"op": "config_set", "config": []}, None)["ok"])
 
+    def test_non_finite_numbers_are_rejected_not_silently_defaulted(self) -> None:
+        # The loader drops NaN/infinity and keeps the default, so accepting them
+        # here would report success for a write that changed nothing.
+        before = self.config_path.read_text()
+        for value in (float("nan"), float("inf"), float("-inf")):
+            for section, key in (("recognition", "threshold"), ("auth", "timeout")):
+                with self.subTest(key=f"{section}.{key}", value=value):
+                    response = self.daemon._dispatch(
+                        {"op": "config_set", "config": {section: {key: value}}}, None
+                    )
+                    self.assertFalse(response["ok"])
+                    self.assertIn(f"{section}.{key}", response["error"])
+        self.assertEqual(self.config_path.read_text(), before)
+
     def test_int_is_accepted_for_a_float_setting(self) -> None:
         response = self.daemon._dispatch(
             {"op": "config_set", "config": {"auth": {"timeout": 5}}}, None

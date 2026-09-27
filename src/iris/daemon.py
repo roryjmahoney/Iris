@@ -51,6 +51,7 @@ import copy
 import errno
 import json
 import logging
+import math
 import os
 import re
 import signal
@@ -1112,10 +1113,10 @@ class IrisDaemon:
                 if known is not None and key in known:
                     if not _same_kind(known[key], value):
                         expected = type(known[key]).__name__
-                        problems.append(
-                            f"{section}.{key}: expected {expected}, "
-                            f"got {type(value).__name__}"
-                        )
+                        got = type(value).__name__
+                        if isinstance(value, float) and not math.isfinite(value):
+                            got = repr(value)
+                        problems.append(f"{section}.{key}: expected {expected}, got {got}")
                 elif not isinstance(value, (bool, int, float, str)):
                     problems.append(
                         f"{section}.{key}: unsupported value type "
@@ -1660,14 +1661,20 @@ def _same_kind(default: Any, value: Any) -> bool:
     """Type-compatibility check mirroring ``iris.config._coerce``.
 
     ``bool`` is tested first everywhere because it is a subclass of ``int``:
-    without that, ``width = true`` would look like a valid integer.
+    without that, ``width = true`` would look like a valid integer.  Floats
+    must also be finite: the loader rejects NaN and infinity, so accepting them
+    here would report success for a write that silently kept the default.
     """
     if isinstance(default, bool):
         return isinstance(value, bool)
     if isinstance(default, int):
         return isinstance(value, int) and not isinstance(value, bool)
     if isinstance(default, float):
-        return isinstance(value, (int, float)) and not isinstance(value, bool)
+        return (
+            isinstance(value, (int, float))
+            and not isinstance(value, bool)
+            and math.isfinite(value)
+        )
     if isinstance(default, str):
         return isinstance(value, str)
     return False
