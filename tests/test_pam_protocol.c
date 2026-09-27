@@ -271,6 +271,9 @@ static void test_verdicts(void)
 		{"{\"ok\":false,\"reason\":\"not_enrolled\"}\n", PAM_AUTHINFO_UNAVAIL},
 		/* whitespace and key order are irrelevant */
 		{"  { \"reason\" : \"match\" , \"ok\" : true }  \r\n", PAM_SUCCESS},
+		/* the full value grammar is understood, not just what irisd sends today */
+		{"{\"ok\":true,\"n\":[0,-1,2.5,-0.25e+3,1E-2,true,false,null],\"o\":{},\"a\":[],"
+		 "\"s\":\"q\\\"\\\\\\u00e9\",\"d\":{\"k\":[{\"z\":1}]}}\n", PAM_SUCCESS},
 	};
 
 	for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
@@ -304,6 +307,28 @@ static void test_malformed_replies_never_authenticate(void)
 		"{\"ok\":false,\"ok\":true}\n",     /* duplicate: first wins, fails closed */
 		"\n",
 		"",                                 /* closed without a reply */
+		/* Balanced, but not JSON: every one must be refused. */
+		"{\"x\":1 \"ok\":true}\n",           /* missing comma */
+		"{\"x\" \"ok\":true}\n",             /* key without a value */
+		"{\"ok\":true \"reason\":\"no_match\"}\n",
+		"{\"ok\" true}\n",                   /* missing colon */
+		"{\"ok\"::true}\n",
+		"{\"ok\":true,}\n",                  /* trailing comma */
+		"{,\"ok\":true}\n",                  /* leading comma */
+		"{\"ok\":true,,\"x\":1}\n",
+		"{ok:true}\n",                       /* unquoted key */
+		"{\"ok\":true,\"x\":[1,,2]}\n",
+		"{\"ok\":true,\"x\":[1 2]}\n",
+		"{\"ok\":true,\"x\":{\"a\"}}\n",
+		"{\"ok\":true,\"x\":01}\n",          /* leading zero */
+		"{\"ok\":true,\"x\":1.}\n",
+		"{\"ok\":true,\"x\":.5}\n",
+		"{\"ok\":true,\"x\":1e}\n",
+		"{\"ok\":true,\"x\":-}\n",
+		"{\"ok\":true,\"x\":NaN}\n",
+		"{\"ok\":true,\"x\":nul}\n",
+		"{\"ok\":true,\"x\":'y'}\n",
+		"{\"ok\":true} x\n",
 	};
 
 	for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); i++) {
@@ -505,6 +530,9 @@ static void test_arguments(void)
 		{"timeout=", 8000}, {"timeout=abc", 8000}, {"timeout=5s", 8000},
 		{"timeout=nan", 8000}, {"timeout=1e999", 8000}, /* ERANGE */
 		{"bogus", 8000},
+		/* out of range for a long: clamped in floating point, never cast */
+		{"timeout=inf", 60000}, {"timeout=1e300", 60000}, {"timeout=9e18", 60000},
+		{"timeout=-inf", 1000}, {"timeout=-1e300", 1000},
 	};
 	struct iris_opts o;
 
