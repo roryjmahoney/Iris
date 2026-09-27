@@ -72,7 +72,12 @@ sudo ./install.sh
 The first command installs the reviewed Ubuntu package set. The installer then
 installs and starts Iris but deliberately enables no PAM service.
 
+Iris finds the infrared camera itself (`camera.device = "auto"`). Check which
+one it picked, and that its IR light works, before enrolling:
+
 ```bash
+iris cameras
+iris doctor
 sudo iris enroll
 sudo iris test
 iris doctor
@@ -142,12 +147,27 @@ sudo iris enroll glasses              # add another appearance
 sudo iris list                        # labels, dates, and sample counts
 sudo iris test                        # exercise the real authentication path
 iris cameras --all                    # inspect capture and metadata nodes
+iris hardware-report                  # camera details for a GitHub hardware issue
 iris doctor                           # installation and hardware diagnostics
 sudo iris config set auth.enabled false
 ```
 
 Run `iris --help` or `iris <command> --help` for the complete CLI. See the
 [configuration reference](docs/CONFIGURATION.md) for defaults and safety bounds.
+
+## Help support your laptop
+
+Iris was built on one laptop, and nobody on the project owns yours. If your
+infrared camera is not found, its light never turns on, or it works well, a
+report is how support gets added:
+
+```bash
+iris hardware-report
+```
+
+Paste the output into a [hardware report](https://github.com/roryjmahoney/Iris/issues/new?template=hardware_report.yml).
+It contains no images, serial numbers, user names or host names. Known results
+are listed under [Hardware: compatibility](docs/HARDWARE.md#compatibility).
 
 ## Development and tests
 

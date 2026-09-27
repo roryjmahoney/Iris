@@ -6,18 +6,26 @@
 # so a bad edit here can never lock you out.
 
 [camera]
-# Verified on this machine: /dev/video2 is the IR sensor (GREY 8-bit, 640x360, 15fps).
-# /dev/video0 is the RGB webcam. /dev/video1 and /dev/video3 are METADATA nodes — the
-# daemon refuses them, but do not point this at them.
-# IR is strongly preferred: it works in darkness and a phone/monitor replay emits no 850nm.
-device = "/dev/video2"
+# "auto" uses the first infrared camera Iris finds, which is right for most laptops
+# and survives /dev/video* being renumbered. To see what this machine has:
+#   iris cameras
+# To pin a specific node instead:
+#   sudo iris config set camera.device /dev/videoN
+# Never pick a node marked "metadata": it carries UVC headers, not images, and the
+# daemon refuses it. IR is strongly preferred over a colour camera: it works in the
+# dark and a phone or monitor replay emits no 850nm light.
+# If your IR camera is not found or does not work, run  iris hardware-report  and
+# open a hardware issue on GitHub with its output.
+device = "auto"
+# Requested frame size. The camera may pick the nearest size it supports; that is fine.
 width = 640
 height = 360
 
-# The IR illuminator on this camera STROBES: alternating frames are dark (mean ~1) and
-# lit (mean ~55-62). With ir_mode on, the daemon discards frames dimmer than
+# Many IR emitters STROBE: alternating frames are dark and lit (on the original test
+# laptop, mean ~1 and ~55-62). With ir_mode on, the daemon discards frames dimmer than
 # min_frame_brightness so recognition only ever sees illuminated frames. Turning this
-# off on an IR camera will make authentication fail roughly half the time.
+# off on a strobing IR camera will make authentication fail roughly half the time.
+# `iris doctor` measures your camera's lit and dark levels.
 ir_mode = true
 min_frame_brightness = 20.0
 

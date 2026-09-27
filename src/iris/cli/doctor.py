@@ -40,7 +40,9 @@ from iris.cli.settings import (
     _RANGES,
     _format_number,
     _safe_list_cameras,
+    is_auto_device,
     load_effective_config,
+    resolve_configured_device,
 )
 
 
@@ -566,14 +568,33 @@ def check_camera(cfg: Mapping[str, Any], timeout: float) -> list[Check]:
     and need different remediation, but they share one capture: opening the IR
     camera twice costs a second and briefly fights the daemon for the device.
     """
-    device = str(cfg["camera"]["device"])
+    configured = str(cfg["camera"]["device"])
     min_brightness = float(cfg["camera"]["min_frame_brightness"])
+
+    resolved = resolve_configured_device(configured)
+    if resolved is None:
+        return [
+            Check(
+                "IR camera", "fail",
+                "camera.device is 'auto' but no infrared camera was recognised",
+                hint=(
+                    f"run  {PROG} cameras  to see this machine's devices; if the laptop "
+                    f"has an IR camera, run  {PROG} hardware-report  and open a hardware "
+                    "issue so support can be added"
+                ),
+            ),
+            Check("IR strobe", "warn", "skipped (camera unavailable)"),
+        ]
+    device = resolved
+    # Open exactly the node that was checked, even if a hot-plug renumbers
+    # /dev/video* between here and the capture.
+    cfg = {**cfg, "camera": {**cfg["camera"], "device": device}}
 
     if not os.path.exists(device):
         available = [c["path"] for c in _safe_list_cameras() if c.get("is_ir")]
         hint = (
-            f"an infrared camera was detected at {available[0]}; select it with  "
-            f"sudo {PROG} config set camera.device {available[0]}"
+            f"an infrared camera was detected at {available[0]}; let Iris pick it with  "
+            f"sudo {PROG} config set camera.device auto"
             if available
             else f"run  {PROG} cameras  to see what this machine has"
         )
@@ -649,7 +670,8 @@ def check_camera(cfg: Mapping[str, Any], timeout: float) -> list[Check]:
     fps = len(means) / elapsed if elapsed > 0 else 0.0
     device_check = Check(
         "IR camera", "ok",
-        f"{device}: {len(means)} frames in {elapsed:.1f}s ({fps:.1f} fps), "
+        f"{'auto → ' if is_auto_device(configured) else ''}{device}: "
+        f"{len(means)} frames in {elapsed:.1f}s ({fps:.1f} fps), "
         f"{cfg['camera']['width']}x{cfg['camera']['height']}",
     )
 
@@ -679,7 +701,9 @@ def check_camera(cfg: Mapping[str, Any], timeout: float) -> list[Check]:
             hint=(
                 "the infrared emitter is not firing, or the threshold is too "
                 f"high: sudo {PROG} config set camera.min_frame_brightness "
-                f"{max(1.0, brightest / 2):.0f}"
+                f"{max(1.0, brightest / 2):.0f}. Many laptops need the emitter "
+                "enabled first (e.g. linux-enable-ir-emitter); if that does not "
+                f"help, run  {PROG} hardware-report  and open a hardware issue"
             ),
         )
     return [device_check, strobe]

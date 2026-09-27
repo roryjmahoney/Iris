@@ -316,7 +316,23 @@ class OpenAndConfigureTests(_CaptureCase):
             ("/dev/video4", 320, 240, 33.0, False),
         )
         default = Camera.from_config({})
-        self.assertEqual((default.device, default.ir_mode), ("/dev/video2", True))
+        self.assertEqual((default.device, default.ir_mode), ("auto", True))
+
+    def test_auto_device_resolves_to_the_infrared_node_on_open(self) -> None:
+        ir = {"path": "/dev/video4", "name": "IR", "is_ir": True, "is_metadata": False, "formats": ["GREY"]}
+        with mock.patch.object(camera, "list_cameras", return_value=[ir]):
+            cam = self._camera(device="auto")
+            self.assertEqual(cam.device, "auto")  # nothing touched until open()
+            cam.open()
+        self.assertEqual(cam.device, "/dev/video4")
+        self.assertEqual(FakeCapture.instances[0].device, "/dev/video4")
+
+    def test_auto_without_an_infrared_camera_is_an_open_error(self) -> None:
+        colour = {"path": "/dev/video0", "name": "FHD", "is_ir": False, "is_metadata": False, "formats": ["MJPG"]}
+        with mock.patch.object(camera, "list_cameras", return_value=[colour]):
+            with self.assertRaisesRegex(CameraOpenError, "no infrared camera"):
+                self._camera(device="auto").open()
+        self.assertEqual(FakeCapture.instances, [])  # never falls back to the colour camera
 
 
 class RawFramesTests(_CaptureCase):
@@ -505,6 +521,21 @@ class ListCamerasTests(unittest.TestCase):
             "video1": {"name": "", "caps": CAPTURE_CAPS, "formats": []},
         }
         self.assertEqual([c["name"] for c in self._list(nodes)], ["Card Name", "video1"])
+
+
+class ResolveDeviceTests(unittest.TestCase):
+    IR = {"path": "/dev/video2", "name": "IR", "is_ir": True, "is_metadata": False, "formats": ["GREY"]}
+
+    def test_auto_spellings(self) -> None:
+        with mock.patch.object(camera, "list_cameras", return_value=[self.IR]):
+            for value in ("auto", "AUTO", " auto ", ""):
+                with self.subTest(value=value):
+                    self.assertEqual(camera.resolve_device(value), "/dev/video2")
+
+    def test_explicit_choices_are_left_alone(self) -> None:
+        with mock.patch.object(camera, "list_cameras", side_effect=AssertionError("not consulted")):
+            self.assertEqual(camera.resolve_device("/dev/video0"), "/dev/video0")
+            self.assertEqual(camera.resolve_device(3), 3)
 
 
 class MetadataNodeTests(unittest.TestCase):

@@ -1125,7 +1125,7 @@ class IrisDaemon:
 
         device = incoming.get("camera", {})
         device = device.get("device") if isinstance(device, Mapping) else None
-        if isinstance(device, str) and device:
+        if isinstance(device, str) and device and device.strip().lower() != "auto":
             problems.extend(_validate_device_choice(device))
         return problems
 

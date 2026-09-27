@@ -356,7 +356,7 @@ every local user.
 | Listen backlog | 8 | More than a couple of clients waiting means something is wrong. |
 | Idle timeout | 30 s | A connection that sits idle between requests is closed. |
 | Shutdown grace | 10 s | In-flight requests get this long; a client whose request is cut short sees the connection close, which every caller already treats as a failure. |
-| Camera lock | one at a time | `/dev/video2` is single-open and the emitter strobes; two concurrent captures produce read errors for both. Every capture in the system funnels through one lock and concurrent requests queue. |
+| Camera lock | one at a time | The IR capture node is single-open and the emitter strobes; two concurrent captures produce read errors for both. Every capture in the system funnels through one lock and concurrent requests queue. |
 
 Every socket operation in `iris.protocol` is bounded by a deadline. The helpers
 **refuse** to operate on a socket whose timeout is `None`: a blocking read with

@@ -275,6 +275,35 @@ def default_ir_camera() -> dict[str, Any] | None:
     return None
 
 
+#: ``camera.device`` value meaning "use the first infrared capture node".  The
+#: default, because ``/dev/video*`` numbering differs between laptops and even
+#: between boots of the same laptop (a dock or a kernel update can renumber).
+AUTO_DEVICE: Final[str] = "auto"
+
+
+def resolve_device(configured: str | int) -> str | int:
+    """Turn a ``camera.device`` setting into something that can be opened.
+
+    ``"auto"`` (or an empty value) picks the first infrared capture node.  Any
+    other value is returned unchanged: an explicit choice always wins, even if
+    it is a colour camera, because the administrator asked for it.
+
+    :raises CameraOpenError: ``auto`` was requested and no infrared camera
+        exists.  Deliberately *not* falling back to a colour camera: a printed
+        photograph defeats face authentication on one.
+    """
+    if isinstance(configured, str) and configured.strip().lower() in ("", AUTO_DEVICE):
+        camera = default_ir_camera()
+        if camera is None:
+            raise CameraOpenError(
+                "camera.device is 'auto' but no infrared camera was found; "
+                "run 'iris cameras' to see this machine's video devices"
+            )
+        _LOG.debug("camera.device=auto resolved to %s (%s)", camera["path"], camera["name"])
+        return str(camera["path"])
+    return configured
+
+
 def _is_metadata_node(path: str) -> bool | None:
     """True/False if the node's kind is known, ``None`` if it could not be queried."""
     try:
@@ -337,7 +366,7 @@ class Camera:
         """Build a camera from a loaded :mod:`iris.config` dict."""
         camera_cfg = cfg.get("camera", {})
         return cls(
-            device=camera_cfg.get("device", "/dev/video2"),
+            device=camera_cfg.get("device", AUTO_DEVICE),
             width=camera_cfg.get("width", 640),
             height=camera_cfg.get("height", 360),
             min_brightness=camera_cfg.get("min_frame_brightness", 20.0),
@@ -372,6 +401,11 @@ class Camera:
         """
         if self._cap is not None:
             return
+
+        # Resolved here rather than in from_config(), so constructing a Camera
+        # never touches /dev and an "auto" failure surfaces as a CameraError
+        # from the same call every caller already guards.
+        self.device = resolve_device(self.device)
 
         path = self.device if isinstance(self.device, str) else None
         if path is not None and _VIDEO_NODE_RE.match(path):

@@ -42,7 +42,7 @@ _RANGES: dict[str, tuple[float, float]] = {
 
 #: One-line descriptions, shown when a key is rejected or listed.
 _DESCRIPTIONS: dict[str, str] = {
-    "camera.device": "V4L2 node of the infrared camera",
+    "camera.device": "V4L2 node of the infrared camera, or 'auto' to pick it",
     "camera.width": "capture width in pixels",
     "camera.height": "capture height in pixels",
     "camera.ir_mode": "request GREY 8-bit and drop dark strobe frames",
@@ -171,7 +171,13 @@ def semantic_check(dotted: str, value: Any) -> list[str]:
 
     if dotted == "camera.device":
         device = str(value)
-        if not device.startswith("/dev/"):
+        if device.strip().lower() == "auto":
+            if not any(c.get("is_ir") for c in _safe_list_cameras()):
+                warnings.append(
+                    "no infrared camera is detected right now, so 'auto' has "
+                    f"nothing to pick; run  {PROG} cameras"
+                )
+        elif not device.startswith("/dev/"):
             warnings.append(f"{device} is not a /dev node; the daemon may not open it")
         elif not os.path.exists(device):
             warnings.append(f"{device} does not exist right now")
@@ -244,6 +250,24 @@ def _safe_list_cameras() -> list[dict[str, Any]]:
     except OSError as exc:
         logging.getLogger("iris.cli").debug("camera enumeration failed: %s", exc)
         return []
+
+
+def is_auto_device(device: Any) -> bool:
+    return str(device).strip().lower() in ("", "auto")
+
+
+def resolve_configured_device(device: Any) -> str | None:
+    """The node ``camera.device`` means right now; ``None`` if ``auto`` finds none.
+
+    Mirrors :func:`iris.camera.resolve_device` without importing OpenCV, so
+    ``status`` and friends stay fast.
+    """
+    if not is_auto_device(device):
+        return str(device)
+    for camera in _safe_list_cameras():
+        if camera.get("is_ir"):
+            return str(camera.get("path"))
+    return None
 
 
 def _format_number(value: Any) -> str:

@@ -317,7 +317,11 @@ class SettingsPage(Adw.NavigationPage):
         # a pending change makes the discrepancy visible and fixable in one
         # click, instead of silently leaving a dead device path on disk.
         configured = str(self._pending.get("camera", {}).get("device", ""))
-        if configured and all(camera.path != configured for camera in self._cameras):
+        # "auto" names no node on purpose; the combo shows what it picks
+        # (the first infrared camera) without pinning it.
+        if configured and configured.strip().lower() != "auto" and all(
+            camera.path != configured for camera in self._cameras
+        ):
             self._on_camera_changed()
             self._window.toast("The saved camera is missing — Iris picked another")
 

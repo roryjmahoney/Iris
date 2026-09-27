@@ -23,7 +23,7 @@ from iris.cli.constants import (
 )
 from iris.cli.faces import _faces_or_empty
 from iris.cli.output import CommandError, console
-from iris.cli.settings import load_effective_config
+from iris.cli.settings import is_auto_device, load_effective_config, resolve_configured_device
 
 
 def _require_keyring_hooks() -> None:
@@ -108,8 +108,10 @@ def cmd_status(args: argparse.Namespace) -> int:
     auth_enabled = bool(cfg["auth"]["enabled"])
     _kv("face auth", console.green("enabled") if auth_enabled else console.yellow("disabled"))
 
-    device = str(cfg["camera"]["device"])
-    present = os.path.exists(device)
+    configured = str(cfg["camera"]["device"])
+    resolved = resolve_configured_device(configured)
+    device = f"auto → {resolved or 'no infrared camera found'}" if is_auto_device(configured) else configured
+    present = resolved is not None and os.path.exists(resolved)
     device_text = f"{device} ({cfg['camera']['width']}x{cfg['camera']['height']}"
     device_text += ", IR mode" if cfg["camera"]["ir_mode"] else ", raw mode"
     device_text += ")"
