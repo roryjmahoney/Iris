@@ -1,4 +1,4 @@
-"""Decision logic of irisd: authentication, enrolment, lockout and admin ops.
+"""Decision logic of irisd: authentication, enrollment, lockout and admin ops.
 
 Handlers are called directly with a scripted camera, face engine, liveness
 checker and clock, so every accept/reject path is deterministic.  The real
@@ -90,7 +90,7 @@ class Clock:
 
 
 class ScriptedCamera:
-    """Camera stand-in: yields scripted frames, honouring the time budget."""
+    """Camera stand-in: yields scripted frames, honoring the time budget."""
 
     script: list[Frame] = []
     step = 0.1
@@ -536,7 +536,7 @@ class LockoutTests(_DaemonCase):
 
 
 # --------------------------------------------------------------------------- #
-# Enrolment
+# Enrollment
 # --------------------------------------------------------------------------- #
 
 
@@ -628,11 +628,11 @@ class EnrollTests(_DaemonCase):
         self.assertFalse(response["ok"])
         self.assertEqual(response["reason"], protocol.REASON_SPOOF_SUSPECTED)
         self.assertEqual(self.store.added, [])
-        # Enrolment *does* explain the problem: the user is present and cooperating.
+        # Enrollment *does* explain the problem: the user is present and cooperating.
         self.assertIn(daemon_module._LIVENESS_HINTS["no_ir_return"], {l["hint"] for l in self.lines})
 
     def test_straight_on_view_is_required(self) -> None:
-        # Nobody in frame for the whole centre pose, then a perfect run of the
+        # Nobody in frame for the whole center pose, then a perfect run of the
         # other four poses: 12 samples, but no straight-on view.
         pose_frames = int(daemon_module.ENROLL_POSE_TIMEOUT / ScriptedCamera.step) + 2
         ScriptedCamera.script = [EMPTY] * pose_frames + matching(400)
@@ -643,14 +643,14 @@ class EnrollTests(_DaemonCase):
 
     def test_too_few_samples_fail_but_a_partial_schedule_succeeds(self) -> None:
         pose_frames = int(daemon_module.ENROLL_POSE_TIMEOUT / ScriptedCamera.step) + 2
-        # Centre and left captured (3 settle + 3 sample frames each, plus the
+        # Center and left captured (3 settle + 3 sample frames each, plus the
         # frame that advances the pose), then the user leaves: 6 is enough.
         ScriptedCamera.script = matching(13) + [EMPTY] * (pose_frames * 3 + 5)
         response = self.enroll()
         self.assertTrue(response["ok"], response)
         self.assertEqual(response["samples"], daemon_module.ENROLL_MIN_SAMPLES)
 
-        # Centre only: 3 samples is not.
+        # Center only: 3 samples is not.
         self.store.added.clear()
         ScriptedCamera.script = matching(6) + [EMPTY] * (pose_frames * 4 + 5)
         response = self.enroll()

@@ -185,7 +185,7 @@ def describe_nodes() -> list[dict[str, Any]]:
         node: dict[str, Any] = {
             "path": path,
             "name": str(entry.get("name", "")),
-            "kind": "metadata" if entry.get("is_metadata") else ("infrared" if entry.get("is_ir") else "colour"),
+            "kind": "metadata" if entry.get("is_metadata") else ("infrared" if entry.get("is_ir") else "color"),
             "driver": _driver(path),
             "formats": {
                 str(fourcc): frame_sizes(path, str(fourcc)) for fourcc in entry.get("formats") or []
@@ -298,7 +298,7 @@ def verdict(report: Mapping[str, Any]) -> list[str]:
     nodes = report.get("nodes") or []
     if not any(n.get("kind") == "infrared" for n in nodes):
         notes.append(
-            "No infrared camera was recognised. If this laptop has one (Windows "
+            "No infrared camera was recognized. If this laptop has one (Windows "
             "Hello), its name and formats above are what's needed to add support."
         )
     sample = report.get("sample")

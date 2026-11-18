@@ -1,7 +1,7 @@
 /* Iris — extension preferences (GNOME 48-50, Adw).
  *
  * These settings control the extension's *presentation* only. The security
- * behaviour lives in /etc/iris/config.toml and the PAM stack; nothing here can
+ * behavior lives in /etc/iris/config.toml and the PAM stack; nothing here can
  * weaken or strengthen authentication, which is why none of it needs root.
  */
 
@@ -30,7 +30,7 @@ export default class IrisPreferences extends ExtensionPreferences {
 
         const indicator = new Adw.SwitchRow({
             title: 'Top bar indicator',
-            subtitle: 'Show daemon health and enrolment status in the panel',
+            subtitle: 'Show daemon health and enrollment status in the panel',
         });
         display.add(indicator);
         settings.bind('show-indicator', indicator, 'active', Gio.SettingsBindFlags.DEFAULT);

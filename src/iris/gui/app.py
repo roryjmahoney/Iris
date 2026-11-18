@@ -3,7 +3,7 @@
 Structure
 ---------
 One :class:`Adw.ApplicationWindow` holding an :class:`Adw.NavigationView` whose
-root is the welcome screen; Enrol, Your Faces and Settings are pushed onto it.
+root is the welcome screen; Enroll, Your Faces and Settings are pushed onto it.
 A navigation stack rather than a tab strip because these are *destinations you
 come back from*, not sections you switch between: the back gesture, the back
 button and Escape all mean the same thing on every screen, and the header title
@@ -12,7 +12,7 @@ always names where you are.
 Theming
 -------
 Light and dark come from :class:`Adw.StyleManager`, which is the only source
-that accounts for the desktop's colour-scheme portal, an application override
+that accounts for the desktop's color-scheme portal, an application override
 and the forced-light/forced-dark cases together.  The window mirrors its
 ``dark`` property onto an ``iris-dark`` CSS class on itself; because the window
 is the CSS ``:root``, the custom properties that class redefines cascade to
@@ -39,7 +39,7 @@ from .widgets import FaceDial
 
 _LOG = logging.getLogger("iris.gui.app")
 
-#: Below this the window is one narrow column: the enrolment portrait shrinks
+#: Below this the window is one narrow column: the enrollment portrait shrinks
 #: and slider marks lose their labels.  Matches libadwaita's own convention of
 #: switching to a compact layout at around a 600 px content width.
 _COMPACT_CONDITION: Final[str] = "max-width: 560px"
@@ -204,7 +204,7 @@ class WelcomePage(Adw.NavigationPage):
         if error is not None:
             # The count is unknown, not zero, so the pill states only what we
             # actually know -- whether face unlock is switched on -- rather
-            # than claiming an enrolment that may or may not exist.
+            # than claiming an enrollment that may or may not exist.
             if not error.retryable:
                 self._status_pill.set_label(error.message)
                 self._status_pill.add_css_class("iris-warn")
@@ -260,7 +260,7 @@ class IrisWindow(Adw.ApplicationWindow):
         self._navigation.add(self._welcome)
 
         # Built lazily: Settings enumerates cameras (which imports OpenCV) and
-        # Enrol builds a live preview, neither of which should be paid for by
+        # Enroll builds a live preview, neither of which should be paid for by
         # someone who opens the window and closes it again.
         self._enroll_page: EnrollPage | None = None
         self._settings_page: SettingsPage | None = None
@@ -271,11 +271,11 @@ class IrisWindow(Adw.ApplicationWindow):
 
         self._install_actions()
         self._install_breakpoint()
-        self._follow_colour_scheme()
+        self._follow_color_scheme()
 
     # -- theming ---------------------------------------------------------
 
-    def _follow_colour_scheme(self) -> None:
+    def _follow_color_scheme(self) -> None:
         manager = Adw.StyleManager.get_default()
         manager.connect("notify::dark", lambda *_a: self._sync_dark())
         self._sync_dark()
@@ -368,7 +368,7 @@ class IrisWindow(Adw.ApplicationWindow):
 
         Pushing a page twice is a programming error in AdwNavigationView (it
         warns and refuses), and it is reachable here: Settings can be opened
-        from Enrol, which was itself opened from the welcome screen.
+        from Enroll, which was itself opened from the welcome screen.
         """
         if page in self._navigation.get_navigation_stack():
             self._navigation.pop_to_page(page)

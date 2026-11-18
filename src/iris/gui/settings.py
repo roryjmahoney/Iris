@@ -16,7 +16,7 @@ the defaults and writes atomically, so sending the entire document is both
 correct and cheaper than a diff.
 
 The faces list is built as a reusable :class:`FacesGroup` so the same list,
-with the same behaviour, appears both inside Settings and on its own page.
+with the same behavior, appears both inside Settings and on its own page.
 """
 
 from __future__ import annotations
@@ -301,7 +301,7 @@ class SettingsPage(Adw.NavigationPage):
         self._loading = True
         try:
             labels = [
-                f"{cam.title} — {'Infrared' if cam.is_ir else 'Colour'}"
+                f"{cam.title} — {'Infrared' if cam.is_ir else 'Color'}"
                 for cam in self._cameras
             ]
             self._camera_row.set_model(Gtk.StringList.new(labels))
@@ -379,7 +379,7 @@ class SettingsPage(Adw.NavigationPage):
         camera_cfg["device"] = camera.path
         # ir_mode is not cosmetic: it selects the GREY pixel format and turns on
         # the dark-frame filter that the strobing emitter makes necessary.
-        # Asking a colour camera for GREY, or filtering its (uniformly bright)
+        # Asking a color camera for GREY, or filtering its (uniformly bright)
         # frames for illumination, would both go wrong -- so it follows the
         # device rather than being a separate switch the user has to get right.
         camera_cfg["ir_mode"] = camera.is_ir
@@ -450,7 +450,7 @@ class SettingsPage(Adw.NavigationPage):
         self._set_applying(False)
         if error is not None:
             self._refresh_dirty()
-            if isinstance(error, backend.AuthorisationCancelled):
+            if isinstance(error, backend.AuthorizationCancelled):
                 self._window.toast("Settings were not saved")
             else:
                 _show_error(self._window, "Those settings could not be saved", error,
@@ -534,7 +534,7 @@ class FacesGroup(Adw.PreferencesGroup):
     def _on_loaded(self, faces: Any, error: BackendError | None) -> None:
         self._busy = False
         if error is not None:
-            if isinstance(error, backend.AuthorisationCancelled):
+            if isinstance(error, backend.AuthorizationCancelled):
                 self._show_locked()
                 return
             self._show_locked(error)
@@ -562,7 +562,7 @@ class FacesGroup(Adw.PreferencesGroup):
     def _show_locked(self, error: BackendError | None = None) -> None:
         self._clear_rows()
 
-        # A non-retryable error means authorising would not help -- the helper
+        # A non-retryable error means authorizing would not help -- the helper
         # is missing, or this account may not manage face data. Offering an
         # Unlock button there just sends the user through a password prompt to
         # reach the same dead end, so say what is actually wrong instead.
@@ -594,7 +594,7 @@ class FacesGroup(Adw.PreferencesGroup):
         if not self._faces:
             row = Adw.ActionRow(
                 title="No face is set up yet",
-                subtitle="Enrol one and you can sign in by looking at your laptop.",
+                subtitle="Enroll one and you can sign in by looking at your laptop.",
             )
             setup = Gtk.Button(label="Set up", valign=Gtk.Align.CENTER)
             setup.add_css_class("suggested-action")
@@ -630,7 +630,7 @@ class FacesGroup(Adw.PreferencesGroup):
         dialog = Adw.AlertDialog(
             heading=f"Remove “{face.title}”?",
             body=(
-                "You will not be able to sign in with this face until you enrol "
+                "You will not be able to sign in with this face until you enroll "
                 "it again. Your password is unaffected."
             ),
         )
@@ -668,7 +668,7 @@ class FacesGroup(Adw.PreferencesGroup):
         dialog.add_response("clear", "Remove everything")
         dialog.set_response_appearance("clear", Adw.ResponseAppearance.DESTRUCTIVE)
         # The safe answer is the default and the Escape answer, so a stray
-        # Return or Escape can never destroy the user's enrolment.
+        # Return or Escape can never destroy the user's enrollment.
         dialog.set_default_response("cancel")
         dialog.set_close_response("cancel")
         dialog.connect("response", self._on_clear_response)
@@ -693,13 +693,13 @@ class FacesGroup(Adw.PreferencesGroup):
     ) -> None:
         self._busy = False
         if error is not None:
-            if isinstance(error, backend.AuthorisationCancelled):
+            if isinstance(error, backend.AuthorizationCancelled):
                 self._window.toast("Nothing was removed")
             else:
                 _show_error(self._window, "That could not be removed", error)
             # What is on screen is now unknown rather than merely stale, so
             # re-read it -- without prompting, since the user has just been
-            # through one authorisation that did not work out.
+            # through one authorization that did not work out.
             self.refresh(allow_prompt=False)
             return
 
@@ -905,7 +905,7 @@ def _show_error(
 
     Every one of these dialogs offers a way forward, and none of them implies
     the user broke something -- the failures reachable from here are missing
-    helpers, refused authorisations and absent hardware.
+    helpers, refused authorizations and absent hardware.
     """
     dialog = Adw.AlertDialog(heading=heading, body=error.message)
     if error.detail:

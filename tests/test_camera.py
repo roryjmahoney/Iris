@@ -136,7 +136,7 @@ class StrobeFilteringTests(_CaptureCase):
         self.assertIn("emitter may not be firing", logs.output[0])
         self.assertEqual(cam.last_frame_mean, 3.0)
 
-    def test_colour_and_wide_frames_are_normalised_to_gray_uint8(self) -> None:
+    def test_color_and_wide_frames_are_normalised_to_gray_uint8(self) -> None:
         bgr = cv2.cvtColor(_gray(80), cv2.COLOR_GRAY2BGR)
         bgra = cv2.cvtColor(_gray(90), cv2.COLOR_GRAY2BGRA)
         single = _gray(70)[:, :, None]
@@ -226,7 +226,7 @@ class OpenAndConfigureTests(_CaptureCase):
         self.assertEqual(cap.props[cv2.CAP_PROP_FRAME_WIDTH], 64)
         self.assertEqual(cap.props[cv2.CAP_PROP_FRAME_HEIGHT], 36)
 
-    def test_colour_mode_leaves_the_format_alone(self) -> None:
+    def test_color_mode_leaves_the_format_alone(self) -> None:
         self._camera(ir_mode=False).open()
         cap = FakeCapture.instances[0]
         self.assertNotIn(cv2.CAP_PROP_FOURCC, cap.props)
@@ -328,11 +328,11 @@ class OpenAndConfigureTests(_CaptureCase):
         self.assertEqual(FakeCapture.instances[0].device, "/dev/video4")
 
     def test_auto_without_an_infrared_camera_is_an_open_error(self) -> None:
-        colour = {"path": "/dev/video0", "name": "FHD", "is_ir": False, "is_metadata": False, "formats": ["MJPG"]}
-        with mock.patch.object(camera, "list_cameras", return_value=[colour]):
+        color = {"path": "/dev/video0", "name": "FHD", "is_ir": False, "is_metadata": False, "formats": ["MJPG"]}
+        with mock.patch.object(camera, "list_cameras", return_value=[color]):
             with self.assertRaisesRegex(CameraOpenError, "no infrared camera"):
                 self._camera(device="auto").open()
-        self.assertEqual(FakeCapture.instances, [])  # never falls back to the colour camera
+        self.assertEqual(FakeCapture.instances, [])  # never falls back to the color camera
 
 
 class RawFramesTests(_CaptureCase):
@@ -484,7 +484,7 @@ class ListCamerasTests(unittest.TestCase):
     def test_ir_detection_heuristics(self) -> None:
         cases = {
             "Integrated Camera": (["GREY"], True),          # mono-only formats
-            "Integrated Camera ": (["GREY", "YUYV"], False),  # has a colour format
+            "Integrated Camera ": (["GREY", "YUYV"], False),  # has a color format
             "Infrared Camera": (["MJPG"], True),
             "IR Camera": (["MJPG"], True),
             "IRIS Webcam": (["MJPG"], False),                # not a standalone token

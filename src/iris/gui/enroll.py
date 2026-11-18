@@ -1,4 +1,4 @@
-"""The enrolment wizard.
+"""The enrollment wizard.
 
 Three screens in a crossfading :class:`Gtk.Stack`: name the face, capture it,
 see the result.  Everything interesting happens on the middle screen, which is
@@ -7,7 +7,7 @@ also where the one piece of awkward hardware truth lives.
 The camera handover
 -------------------
 V4L2 capture devices are exclusive: while the GUI holds ``/dev/video2`` open
-for its live preview, ``pkexec iris enroll`` cannot open it, and the enrolment
+for its live preview, ``pkexec iris enroll`` cannot open it, and the enrollment
 fails before it starts.  Writing templates into ``/var/lib/iris`` requires
 root, so the capture genuinely has to happen in the privileged helper -- which
 means the preview and the capture cannot overlap, however much we would like
@@ -33,7 +33,7 @@ So the capture screen runs in three phases:
     just not live video, which nothing on this machine can provide while
     another process is reading the sensor.
 
-The alternative -- previewing from the *colour* camera during capture -- was
+The alternative -- previewing from the *color* camera during capture -- was
 rejected: two cameras lighting up for one operation is alarming, and pointing a
 preview at a different sensor than the one doing the work is a lie.
 
@@ -48,7 +48,7 @@ wizard                               dial
 opening the camera                   ``idle`` -- travelling wave
 first lit frame, user lining up      ``scanning`` -- faster, breathing
 helper reporting samples             ``progress`` -- tweened fill
-enrolment finished                   ``success`` -- three beats
+enrollment finished                   ``success`` -- three beats
 anything went wrong                  ``failure`` -- shake, back to idle
 ===================================  ===============================
 
@@ -126,7 +126,7 @@ _DIAL_SIZE_COMPACT: Final[int] = 220
 
 
 class EnrollPage(Adw.NavigationPage):
-    """Guides one enrolment from start to finish."""
+    """Guides one enrollment from start to finish."""
 
     __gtype_name__ = "IrisEnrollPage"
 
@@ -180,7 +180,7 @@ class EnrollPage(Adw.NavigationPage):
 
         AdwNavigationView pops on Escape by itself, and the ``hidden`` handler
         above would clean up either way -- but relying on that would make the
-        behaviour of a documented cancel key an implementation detail of
+        behavior of a documented cancel key an implementation detail of
         another widget. Binding it explicitly, and consuming the event, means
         Escape does exactly one thing here no matter what else is listening.
         """
@@ -238,7 +238,7 @@ class EnrollPage(Adw.NavigationPage):
         group = Adw.PreferencesGroup(
             title="This face",
             description=(
-                "You can enrol more than one — for example one with glasses and "
+                "You can enroll more than one — for example one with glasses and "
                 "one without. Each gets its own name."
             ),
         )
@@ -319,7 +319,7 @@ class EnrollPage(Adw.NavigationPage):
         box.set_valign(Gtk.Align.CENTER)
 
         # The dial is the base of the overlay, so it defines the stage size;
-        # the preview and the shimmer are centred inside it at the diameter the
+        # the preview and the shimmer are centered inside it at the diameter the
         # spec reserves for them, which is what leaves the gap between the
         # ticks and the image.
         inner = FaceDial.inner_diameter(_DIAL_SIZE)
@@ -437,7 +437,7 @@ class EnrollPage(Adw.NavigationPage):
             height=int(camera_cfg.get("height", 360)),
             # ir_mode drives the GREY format negotiation, so it must follow the
             # device that was actually chosen, not the configured flag -- a
-            # fallback to the colour camera would otherwise ask it for GREY.
+            # fallback to the color camera would otherwise ask it for GREY.
             ir_mode=camera.is_ir,
             min_brightness=float(camera_cfg.get("min_frame_brightness", 20.0)),
             on_frame=self._on_preview_frame,
@@ -457,7 +457,7 @@ class EnrollPage(Adw.NavigationPage):
         self._camera_banner.set_revealed(not camera.is_ir)
         if not camera.is_ir:
             self._camera_banner.set_title(
-                "This is a colour camera. Face unlock will not work in the dark."
+                "This is a color camera. Face unlock will not work in the dark."
             )
 
     def _on_preview_frame(self, frame: backend.PreviewFrame) -> None:
@@ -484,7 +484,7 @@ class EnrollPage(Adw.NavigationPage):
             # its current state precisely so that a stray call cannot make the
             # ring pulse at 15 fps.
             self._dial.set_scanning()
-            self._set_hint("Centre your face in the circle")
+            self._set_hint("Center your face in the circle")
             self._set_busy(False, "Ready when you are")
 
     def _on_preview_error(self, error: BackendError) -> None:
@@ -672,7 +672,7 @@ class EnrollPage(Adw.NavigationPage):
         self._scan.stop()
         self._stop_worker()
 
-        cancelled = isinstance(error, backend.AuthorisationCancelled)
+        cancelled = isinstance(error, backend.AuthorizationCancelled)
         secondary = ("Not now", self._close_page) if cancelled else (
             "Camera settings", self._window.open_settings
         )
@@ -745,7 +745,7 @@ class EnrollPage(Adw.NavigationPage):
             if outcome == "success":
                 self._badge.show_success("Face unlock is ready")
             elif outcome == "failure":
-                self._badge.show_failure("Enrolment did not finish")
+                self._badge.show_failure("Enrollment did not finish")
             else:
                 self._badge.reset()
             self._primary_button.grab_focus()
@@ -803,7 +803,7 @@ class EnrollPage(Adw.NavigationPage):
         self._window.pop_page()
 
     def _cancel(self) -> None:
-        """Abandon the enrolment and leave.  Bound to Cancel and to Escape."""
+        """Abandon the enrollment and leave.  Bound to Cancel and to Escape."""
         self._close_page()
 
     def _teardown(self) -> None:

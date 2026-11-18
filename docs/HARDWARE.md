@@ -21,7 +21,7 @@ Iris reads the kernel's per-node `device_caps` and refuses
 
 By default `camera.device` is `auto`: Iris uses the first infrared capture node
 each time it opens the camera, so a dock or kernel update that renumbers
-`/dev/video*` does not break it. `auto` never falls back to a colour camera,
+`/dev/video*` does not break it. `auto` never falls back to a color camera,
 because a printed photograph defeats face authentication on one. To pin a
 specific node instead:
 

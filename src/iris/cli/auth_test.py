@@ -105,7 +105,7 @@ def _retry_after(message: Mapping[str, Any]) -> float | None:
 
 def _test_hint(reason: str, user: str, message: Mapping[str, Any]) -> str:
     if reason == protocol.REASON_NOT_ENROLLED:
-        return f"enrol a face first:  sudo {PROG} enroll --user {user}"
+        return f"enroll a face first:  sudo {PROG} enroll --user {user}"
     if reason == protocol.REASON_DISABLED:
         return f"re-enable it with:  sudo {PROG} config set auth.enabled true"
     if reason == protocol.REASON_LOCKOUT:
@@ -119,7 +119,7 @@ def _test_hint(reason: str, user: str, message: Mapping[str, Any]) -> str:
         return "sit 40-70cm from the screen and face the camera squarely"
     if reason == protocol.REASON_NO_MATCH:
         return (
-            "if this is really you, re-enrol under your current appearance:  "
+            "if this is really you, re-enroll under your current appearance:  "
             f"sudo {PROG} enroll --user {user} glasses"
         )
     if reason == protocol.REASON_SPOOF_SUSPECTED:

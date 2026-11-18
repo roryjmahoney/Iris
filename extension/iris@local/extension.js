@@ -27,7 +27,7 @@
  * --------
  * The lock-screen indicator is a real drawn object — the 48-tick dial specified in
  * docs/ANIMATION.md — rendered with Cairo into an St.DrawingArea. The GTK4
- * enrolment app draws the same dial from the same numbers, so the two runtimes
+ * enrollment app draws the same dial from the same numbers, so the two runtimes
  * look like one product.
  *
  * Three rules govern the motion, and they are all about not being a bad citizen
@@ -60,7 +60,7 @@
  * Inside the AuthPrompt there is no positioning to get wrong. It is a stock
  * vertical St.BoxLayout, so a child is measured, spaced and allocated by the
  * shell; and both dialogs derive the auth column's size from the prompt's
- * get_preferred_size(), so a prompt that grew to fit the dial re-centres itself.
+ * get_preferred_size(), so a prompt that grew to fit the dial re-centers itself.
  * The same three lines work on the lock screen and at the greeter, because
  * LoginDialog *is* the unlockDialog constructor in gdm mode.
  *
@@ -173,7 +173,7 @@ const CHECK_END_MS = 720;
 const SUCCESS_TICK_LEN = 1.5;       // converged length, as a multiple of L
 const CHECK_TICK_FADE = 0.35;       // ticks fade to this so the check reads
 
-// Checkmark, normalised to the ring's inner box (unit square, origin top-left).
+// Checkmark, normalized to the ring's inner box (unit square, origin top-left).
 const CHECK_POINTS = [[0.26, 0.52], [0.44, 0.70], [0.75, 0.32]];
 
 /* How long to hold the unlock open after a silent PAM success, so the success
@@ -193,7 +193,7 @@ const SHAKE_AMPLITUDE = 0.035;      // A = 0.035 * R
 const SHAKE_CYCLES = 3;
 const DESATURATE_MS = 300;
 
-// Progress (enrolment only — the lock screen has nothing to report a fraction of,
+// Progress (enrollment only — the lock screen has nothing to report a fraction of,
 // but the drawing code implements it so both runtimes stay in sync).
 const PROGRESS_TWEEN_MS = 260;
 const PROGRESS_TICK_LEN = 1.5;
@@ -210,7 +210,7 @@ const FRAME_INTERVAL_MS = 16;
 // Below one step of an 8-bit alpha channel there is nothing on screen to draw.
 const ALPHA_EPSILON = 1 / 255;
 
-/* Colour tokens, straight from ANIMATION.md. The lock screen is always dark, so
+/* Color tokens, straight from ANIMATION.md. The lock screen is always dark, so
  * that is the default, but both columns are here because the same widget is
  * useful in a light session and a half-implemented palette rots. */
 const PALETTE_DARK = {
@@ -293,7 +293,7 @@ const IrisDial = GObject.registerClass(
 class IrisDial extends St.DrawingArea {
     /**
      * @param {object} params - St.DrawingArea construct properties, plus:
-     *   `dark` (default true) to pick the ANIMATION.md colour column.
+     *   `dark` (default true) to pick the ANIMATION.md color column.
      */
     _init(params = {}) {
         const {dark = true, ...actorParams} = params;
@@ -412,7 +412,7 @@ class IrisDial extends St.DrawingArea {
     }
 
     /**
-     * Enrolment progress, 0..1. Tweened over 260 ms with ease-out-cubic so a
+     * Enrollment progress, 0..1. Tweened over 260 ms with ease-out-cubic so a
      * burst of samples reads as one continuous fill rather than a stutter.
      * Unused on the lock screen — there is no fraction there to be honest about —
      * but the state is fully implemented so both runtimes draw the same dial.
@@ -559,7 +559,7 @@ class IrisDial extends St.DrawingArea {
     /* -------------------------------------------------------- tick appearance */
 
     /**
-     * Resolve every tick's alpha, length multiplier and colour for this instant
+     * Resolve every tick's alpha, length multiplier and color for this instant
      * into `out`. Written as one pass over a flat buffer so a frame allocates
      * nothing at all.
      */
@@ -589,7 +589,7 @@ class IrisDial extends St.DrawingArea {
         }
     }
 
-    /** out = lerp(from, out, k), applied uniformly to alpha, length and colour. */
+    /** out = lerp(from, out, k), applied uniformly to alpha, length and color. */
     _blendInto(out, from, k) {
         for (let i = 0; i < out.length; i++)
             out[i] = from[i] + (out[i] - from[i]) * k;
@@ -738,7 +738,7 @@ class IrisDial extends St.DrawingArea {
     /* --------------------------------------------------------- whole-ring pose */
 
     /**
-     * The transform applied to the ring as a body: `scale` about its centre and
+     * The transform applied to the ring as a body: `scale` about its center and
      * `dx` sideways, expressed in units of R so it scales with the widget.
      */
     _pose(now) {
@@ -843,7 +843,7 @@ class IrisDial extends St.DrawingArea {
             const cos = Math.cos(angle);
             const sin = Math.sin(angle);
 
-            // Ticks are centred on R, not grown outward from it, so a lengthening
+            // Ticks are centered on R, not grown outward from it, so a lengthening
             // tick reads as a mark thickening in place rather than as the whole
             // ring swelling. R + peak length + a round cap still clears the
             // widget edge under the 1.066 success overshoot — which is what the
@@ -955,7 +955,7 @@ class IrisDial extends St.DrawingArea {
  *   - AuthPrompt is a stock vertical St.BoxLayout. It defines vfunc_hide and
  *     nothing else, so a child added to it is measured and allocated normally.
  *     Both dialogs size the auth column from the prompt's get_preferred_size(),
- *     so a prompt that grows to fit the dial stays centred by itself.
+ *     so a prompt that grows to fit the dial stays centered by itself.
  *
  * The two things that are NOT relied on, because they do not exist here:
  *   - AuthPrompt has no 'verification-started' / 'verification-complete' /
@@ -1111,7 +1111,7 @@ class IrisHint extends St.BoxLayout {
         this._revealed = true;
 
         this.show();
-        // ease() honours org.gnome.desktop.interface enable-animations through
+        // ease() honors org.gnome.desktop.interface enable-animations through
         // the shell's environment.js, so under reduced motion this is a cut.
         this.ease({
             opacity: 255,
@@ -1533,7 +1533,7 @@ class IrisPromptBinding {
                 continue;
             try {
                 this.prompt.disconnect(id);
-            } catch (e) { /* prompt already finalised */ }
+            } catch (e) { /* prompt already finalized */ }
         }
 
         this._disposeHint();
@@ -1638,7 +1638,7 @@ class IrisPolkitBinding {
         for (const id of this._sessionIds) {
             try {
                 session?.disconnect(id);
-            } catch (e) { /* session already finalised */ }
+            } catch (e) { /* session already finalized */ }
         }
         this._sessionIds = [];
     }
@@ -1979,7 +1979,7 @@ export default class IrisExtension extends Extension {
         for (const [obj, id] of this._signals ?? []) {
             try {
                 obj.disconnect(id);
-            } catch (e) { /* object already finalised */ }
+            } catch (e) { /* object already finalized */ }
         }
         this._signals = [];
 
@@ -2365,7 +2365,7 @@ export default class IrisExtension extends Extension {
         if (this._promptBoxAddedId && this._promptBox) {
             try {
                 this._promptBox.disconnect(this._promptBoxAddedId);
-            } catch (e) { /* already finalised */ }
+            } catch (e) { /* already finalized */ }
         }
         this._promptBoxAddedId = 0;
         this._promptBox = null;
@@ -2373,7 +2373,7 @@ export default class IrisExtension extends Extension {
         if (this._dialogDestroyId && this._dialog) {
             try {
                 this._dialog.disconnect(this._dialogDestroyId);
-            } catch (e) { /* already finalised */ }
+            } catch (e) { /* already finalized */ }
         }
         this._dialogDestroyId = 0;
         this._dialog = null;

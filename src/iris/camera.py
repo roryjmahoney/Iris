@@ -103,7 +103,7 @@ _V4L2_CAP_DEVICE_CAPS: Final[int] = 0x80000000
 _MAX_FORMATS: Final[int] = 64
 
 #: Monochrome pixel formats.  A node that offers only these is an IR sensor:
-#: consumer colour webcams always expose MJPG or YUYV as well.
+#: consumer color webcams always expose MJPG or YUYV as well.
 _MONO_FOURCCS: Final[frozenset[str]] = frozenset({
     "GREY", "Y8", "Y800", "Y10", "Y12", "Y14", "Y16", "Y10B", "Y12B",
 })
@@ -122,7 +122,7 @@ def _ioctl(fd: int, request: int, buffer: bytearray) -> None:
     ``VIDIOC_QUERYCAP`` has bit 31 set (it is a read ioctl), so the constant
     exceeds ``INT_MAX``.  CPython accepts the unsigned form, but the two's
     complement fallback keeps enumeration working if that ever tightens —
-    losing the device list would break enrolment entirely.
+    losing the device list would break enrollment entirely.
     """
     try:
         fcntl.ioctl(fd, request, buffer)
@@ -286,10 +286,10 @@ def resolve_device(configured: str | int) -> str | int:
 
     ``"auto"`` (or an empty value) picks the first infrared capture node.  Any
     other value is returned unchanged: an explicit choice always wins, even if
-    it is a colour camera, because the administrator asked for it.
+    it is a color camera, because the administrator asked for it.
 
     :raises CameraOpenError: ``auto`` was requested and no infrared camera
-        exists.  Deliberately *not* falling back to a colour camera: a printed
+        exists.  Deliberately *not* falling back to a color camera: a printed
         photograph defeats face authentication on one.
     """
     if isinstance(configured, str) and configured.strip().lower() in ("", AUTO_DEVICE):
@@ -463,7 +463,7 @@ class Camera:
             # without this OpenCV may request a format the driver then emulates.
             cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"GREY"))
             # With conversion off, read() hands back the native 2-D uint8 buffer
-            # instead of an expanded 3-channel copy. Frames are normalised in
+            # instead of an expanded 3-channel copy. Frames are normalized in
             # _to_gray() regardless, since drivers may ignore this.
             cap.set(cv2.CAP_PROP_CONVERT_RGB, 0)
 
@@ -558,7 +558,7 @@ class Camera:
     def raw_frames(self, timeout: float) -> Iterator[np.ndarray]:
         """Yield every frame as 3-channel BGR, unfiltered, for up to *timeout* seconds.
 
-        For the enrolment preview: the user needs to see the live feed to line
+        For the enrollment preview: the user needs to see the live feed to line
         their face up, and dropping the dark half of the strobe would make the
         preview flicker at 7.5 fps.  Do not use this for detection.
         """
@@ -606,7 +606,7 @@ class Camera:
 
 
 def _to_gray(frame: np.ndarray) -> np.ndarray:
-    """Normalise a captured frame to a 2-D uint8 array.
+    """Normalize a captured frame to a 2-D uint8 array.
 
     The IR node delivers native GREY, but this also covers a driver that
     ignored ``CAP_PROP_CONVERT_RGB`` and a non-IR device used for testing, so

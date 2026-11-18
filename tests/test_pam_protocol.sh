@@ -19,7 +19,7 @@ temporary_dir="$(mktemp -d "${TMPDIR:-/tmp}/iris-pam-proto.XXXXXX")"
 trap 'rm -rf -- "$temporary_dir"' EXIT HUP INT TERM
 
 # AddressSanitizer and UndefinedBehaviorSanitizer turn any out-of-bounds read
-# or write in the reply parser, or other undefined behaviour, into a failure.
+# or write in the reply parser, or other undefined behavior, into a failure.
 "$compiler" -Wall -Wextra -Werror -O1 -g \
     -fsanitize=address,undefined,float-cast-overflow -fno-sanitize-recover=all -fno-omit-frame-pointer \
     -DIRIS_PAM_TEST_SOCKET="\"$temporary_dir/socket\"" \

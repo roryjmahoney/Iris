@@ -3,26 +3,26 @@
  *
  * Loaded once, at GTK_STYLE_PROVIDER_PRIORITY_APPLICATION, so it layers over
  * libadwaita rather than replacing it: standard controls keep their platform
- * behaviour and only the Iris-specific surfaces are restyled.
+ * behavior and only the Iris-specific surfaces are restyled.
  *
  * Principles
  * ----------
  * - Whitespace is the layout.  Spacing does the work that borders and boxes do
  *   in a denser design, so there is exactly one divider style and no panels.
- * - One accent, taken from the user's system accent colour.  Everything else
+ * - One accent, taken from the user's system accent color.  Everything else
  *   is a neutral or a semantic state, which is what keeps a security tool
  *   looking calm instead of decorated.
  * - Depth is a hint, not an effect.  Shadows are wide, low-opacity and never
- *   coloured; there are no bevels, gloss, insets or textures anywhere.
+ *   colored; there are no bevels, gloss, insets or textures anywhere.
  * - Motion is under 200 ms for anything CSS drives.  Longer, drawn animations
  *   live in widgets.py where they can be timed against the frame clock.
  *
  * Light and dark
  * --------------
- * Every colour is a custom property defined on :root, and the dark theme
+ * Every color is a custom property defined on :root, and the dark theme
  * redefines the same names under `:root.iris-dark`.  The class is toggled by
  * app.py from Adw.StyleManager::dark, which is authoritative for libadwaita --
- * it accounts for the desktop's colour-scheme portal, the user's override and
+ * it accounts for the desktop's color-scheme portal, the user's override and
  * the forced-light/forced-dark cases, none of which a plain media query would
  * see consistently.  Custom properties inherit, so defining them once on the
  * root reaches every widget in the window, dialogs included.
@@ -62,7 +62,7 @@
   --iris-accent-soft:   alpha(@accent_color, 0.12);
   --iris-accent-line:   alpha(@accent_color, 0.34);
 
-  /* The face dial (docs/ANIMATION.md, "Colour").  Pinned literals rather than
+  /* The face dial (docs/ANIMATION.md, "Color").  Pinned literals rather than
      @accent_color, and the only place in this file that departs from the "one
      accent, the user's" rule: the GNOME Shell extension draws the same dial on
      the lock screen and cannot reach libadwaita's accent, and a dial that is
@@ -366,7 +366,7 @@ button.iris-link {
 }
 
 /* -------------------------------------------------------------------------
- * Enrolment stage
+ * Enrollment stage
  * ---------------------------------------------------------------------- */
 
 /* The dial, the circle and the shimmer share one square area, so give it a
@@ -382,7 +382,7 @@ button.iris-link {
   min-height: 220px;
 }
 
-/* The pose instruction. It changes often, so it is centred, large enough to
+/* The pose instruction. It changes often, so it is centered, large enough to
    read peripherally while looking at the camera, and never moves. */
 .iris-hint {
   font-size: var(--iris-text-title2);
@@ -440,8 +440,8 @@ button.iris-link {
  * Errors
  * ---------------------------------------------------------------------- */
 
-/* Failure copy is normal body text in the normal colour. Red text shouting at
-   someone whose camera did not focus is both unhelpful and unkind; the colour
+/* Failure copy is normal body text in the normal color. Red text shouting at
+   someone whose camera did not focus is both unhelpful and unkind; the color
    is reserved for destructive *controls*, where it warns before the fact. */
 .iris-error-title {
   font-size: var(--iris-text-title2);

@@ -104,7 +104,7 @@ class ExtensionContractTests(unittest.TestCase):
             self.skipTest("installed GNOME Shell version cannot be queried")
         match = re.search(r"\b(\d+)(?:\.\d+)*\b", version.stdout)
         if match is None:
-            self.skipTest(f"unrecognised GNOME Shell version: {version.stdout.strip()}")
+            self.skipTest(f"unrecognized GNOME Shell version: {version.stdout.strip()}")
 
         linked = self._run([ldd, shell])
         library_match = re.search(r"\blibshell-[^\s]+\s+=>\s+(\S+)", linked.stdout)

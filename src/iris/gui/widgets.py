@@ -4,7 +4,7 @@ Five widgets, four shared disciplines.
 
 :class:`FaceDial` is the implementation of ``docs/ANIMATION.md`` for the GTK4
 side of the product.  Every number in it -- 48 ticks, the radius and length
-ratios, the lap times, the success beats, the checkmark's normalised
+ratios, the lap times, the success beats, the checkmark's normalized
 coordinates -- comes from that document and nowhere else, because the GNOME
 Shell lock-screen dial is built from the same numbers and the two have to look
 like one product.  If a constant here disagrees with ANIMATION.md, ANIMATION.md
@@ -14,7 +14,7 @@ is right.
 :meth:`Gtk.Widget.add_tick_callback` and reads elapsed time from the
 :class:`Gdk.FrameClock`.  Counting frames instead would make each animation run
 at a different speed on a 60 Hz panel, a 120 Hz panel, and a machine that
-dropped three frames to a garbage collection -- and the enrolment dial, which
+dropped three frames to a garbage collection -- and the enrollment dial, which
 people watch closely, is exactly where that would show.  The travelling wave
 goes further than "read the elapsed time each frame": its phase is
 ``((now - epoch) / lap) mod 1``, a pure function of the monotonic clock, so a
@@ -37,7 +37,7 @@ converter for 'cairo.Context'`` before a single drawing call runs, and the
 widget renders blank.  Installing that package is the only fix and is out of
 scope, so cairo cannot be used here.  Nothing is lost: :class:`Gsk.Stroke`
 gives the round caps and joins the dial and the checkmark need, arcs come from
-:meth:`Gsk.PathBuilder.svg_arc_to`, and the strokes are rasterised on the GPU
+:meth:`Gsk.PathBuilder.svg_arc_to`, and the strokes are rasterized on the GPU
 rather than on the CPU every frame.
 
 **Reduced motion is a real mode, not a switch that stops the clock.**  When
@@ -46,7 +46,7 @@ spring and the shake are gone, but every state still *looks* different from
 every other and still says what it is in text -- see
 :func:`animations_enabled` and the ``reduced`` branches below.
 
-**Themes come from the platform, the dial's colours come from the spec.**
+**Themes come from the platform, the dial's colors come from the spec.**
 Nothing here hard-codes a background; general foreground comes from
 :meth:`Gtk.Widget.get_color`, i.e. from CSS, and the badge's accent follows the
 user's system accent through :class:`Adw.StyleManager`.  The dial is the
@@ -140,10 +140,10 @@ DIAL_BREATHE_AMPLITUDE: Final[float] = 0.015
 
 #: "The fill fraction is tweened, never snapped, with ease-out-cubic over 260 ms."
 DIAL_PROGRESS_MS: Final[float] = 260.0
-#: A filled tick is "full opacity, length L * 1.5, accent colour".
+#: A filled tick is "full opacity, length L * 1.5, accent color".
 DIAL_FILL_LENGTH: Final[float] = 1.5
 #: Radius of the head's glow, in units of L.  Wide enough to read as light
-#: spilling off the leading tick, tight enough not to wash out its neighbours.
+#: spilling off the leading tick, tight enough not to wash out its neighbors.
 DIAL_HEAD_GLOW_MULTIPLE: Final[float] = 3.2
 DIAL_HEAD_GLOW_ALPHA: Final[float] = 0.42
 
@@ -168,7 +168,7 @@ DIAL_CHECK_MS: Final[float] = 460.0
 #: "Ticks fade to 0.35 underneath so the check reads clearly."
 DIAL_SUCCESS_TICK_ALPHA: Final[float] = 0.35
 
-#: The checkmark, normalised to the ring's inner box (unit square, origin top
+#: The checkmark, normalized to the ring's inner box (unit square, origin top
 #: left), stroked with round caps and joins.
 DIAL_CHECK_POINTS: Final[tuple[tuple[float, float], ...]] = (
     (0.26, 0.52),
@@ -181,14 +181,14 @@ DIAL_CHECK_WIDTH: Final[float] = 0.075
 DIAL_CHECK_FIRST_LEG: Final[float] = 0.38
 
 #: Failure: ``x = A * sin(2*pi*3*u) * (1-u)``, ``A = 0.035 * R``, over 420 ms,
-#: with the ticks settling to the muted colour over the first 300 ms.
+#: with the ticks settling to the muted color over the first 300 ms.
 DIAL_SHAKE_MS: Final[float] = 420.0
 DIAL_SHAKE_CYCLES: Final[float] = 3.0
 DIAL_SHAKE_AMPLITUDE: Final[float] = 0.035
 DIAL_SETTLE_MS: Final[float] = 300.0
 
 
-# -- dial colour tokens ------------------------------------------------------
+# -- dial color tokens ------------------------------------------------------
 #
 # ANIMATION.md's table, verbatim, and mirrored in style.css as --iris-tick-* /
 # --iris-dial-*.  See the module docstring for why they are literals here
@@ -204,7 +204,7 @@ _DIAL_IDLE_ALPHA_LIGHT: Final[float] = 0.24
 _DIAL_MUTED_ALPHA_DARK: Final[float] = 0.22
 _DIAL_MUTED_ALPHA_LIGHT: Final[float] = 0.20
 
-#: ``accent`` and ``tick-active`` are the same colour in both themes, so the
+#: ``accent`` and ``tick-active`` are the same color in both themes, so the
 #: dial keeps one accent name.
 _DIAL_ACCENT_DARK: Final[tuple[float, float, float]] = (120 / 255, 190 / 255, 1.0)
 _DIAL_ACCENT_LIGHT: Final[tuple[float, float, float]] = (0.0, 122 / 255, 1.0)
@@ -303,7 +303,7 @@ def animations_enabled() -> bool:
 
     ``gtk-enable-animations`` is GTK's rendering of the platform's
     reduced-motion preference (on GNOME, ``org.gnome.desktop.interface
-    enable-animations``), so reading it here is how a widget honours a setting
+    enable-animations``), so reading it here is how a widget honors a setting
     made in Accessibility.  Absent settings -- no display connection, a unit
     test -- are treated as "animation is fine", because the alternative is
     that a misconfigured environment silently ships the degraded experience.
@@ -315,7 +315,7 @@ def animations_enabled() -> bool:
 
 
 # --------------------------------------------------------------------------
-# colour
+# color
 # --------------------------------------------------------------------------
 
 def is_dark() -> bool:
@@ -324,10 +324,10 @@ def is_dark() -> bool:
 
 
 def accent_rgba() -> Gdk.RGBA:
-    """The system accent colour, adjusted for legibility as a foreground.
+    """The system accent color, adjusted for legibility as a foreground.
 
-    ``get_accent_color_rgba`` returns the colour intended as a *background*
-    (with white text on it).  A 6 px arc in that colour is fine on a light
+    ``get_accent_color_rgba`` returns the color intended as a *background*
+    (with white text on it).  A 6 px arc in that color is fine on a light
     surface but too dim on a dark one, which is what ``to_standalone_rgba``
     exists to correct.
     """
@@ -337,7 +337,7 @@ def accent_rgba() -> Gdk.RGBA:
             manager.get_accent_color(), manager.get_dark()
         )
     except Exception as exc:  # noqa: BLE001 - older or unusual libadwaita
-        _LOG.debug("falling back to the built-in accent colour: %s", exc)
+        _LOG.debug("falling back to the built-in accent color: %s", exc)
         return _rgb(_FALLBACK_ACCENT)
 
 
@@ -368,10 +368,10 @@ def _lerp_rgb(
 
 
 class _DialPalette(NamedTuple):
-    """ANIMATION.md's colour table, resolved for one theme.
+    """ANIMATION.md's color table, resolved for one theme.
 
     Resolved per snapshot rather than cached on the widget: libadwaita can
-    switch the colour scheme mid-animation (the desktop's night mode, a
+    switch the color scheme mid-animation (the desktop's night mode, a
     portal), and a dial that finished its success beat in yesterday's palette
     would be the only stale thing on screen.
     """
@@ -429,10 +429,10 @@ def failure_rgba() -> Gdk.RGBA:
     return _rgb(_FAILURE_DARK if is_dark() else _FAILURE_LIGHT)
 
 
-def _stop(offset: float, colour: Gdk.RGBA) -> Gsk.ColorStop:
+def _stop(offset: float, color: Gdk.RGBA) -> Gsk.ColorStop:
     stop = Gsk.ColorStop()
     stop.offset = offset
-    stop.color = colour
+    stop.color = color
     return stop
 
 
@@ -549,7 +549,7 @@ class _Canvas(Gtk.Widget):
     def _now_us(self) -> int:
         """Current frame time, falling back to the monotonic clock.
 
-        An unrealised widget has no frame clock, but callers still set values
+        An unrealized widget has no frame clock, but callers still set values
         on it during construction; those need a timestamp on the same
         timescale, which :func:`GLib.get_monotonic_time` is.
         """
@@ -741,7 +741,7 @@ class CameraPreview(Gtk.Widget):
     frame, and it costs one node.
 
     The frame is drawn *cover*-fit: scaled until it fills the circle and
-    centre-cropped, so a 16:9 sensor produces a full circle with no letterbox
+    center-cropped, so a 16:9 sensor produces a full circle with no letterbox
     bars.  That is what makes the mask read as a portal rather than a mask.
     """
 
@@ -779,7 +779,7 @@ class CameraPreview(Gtk.Widget):
     def set_dim(self, dim: float) -> None:
         """Dim the image by *dim* (0-1).
 
-        Used once the camera has been handed to the privileged enrolment
+        Used once the camera has been handed to the privileged enrollment
         helper: the last frame stays on screen so the composition does not
         collapse to an empty circle, but it visibly steps back to say "this is
         no longer live".
@@ -792,7 +792,7 @@ class CameraPreview(Gtk.Widget):
     def set_natural_size(self, size: int) -> None:
         """Change the size the widget asks for when space allows.
 
-        Used by the window's breakpoint to shrink the enrolment portrait on a
+        Used by the window's breakpoint to shrink the enrollment portrait on a
         narrow window rather than letting it force the window wider.
         """
         size = int(size)
@@ -837,8 +837,8 @@ class CameraPreview(Gtk.Widget):
             if self._texture is not None:
                 snapshot.append_texture(self._texture, self._cover_rect(bounds))
             else:
-                # A flat wash of the foreground colour: legible in both themes
-                # without inventing a colour that belongs to neither.
+                # A flat wash of the foreground color: legible in both themes
+                # without inventing a color that belongs to neither.
                 snapshot.append_color(with_alpha(self.get_color(), 0.07), bounds)
             if self._dim > 0.0:
                 snapshot.append_color(_rgb((0.0, 0.0, 0.0), 0.55 * self._dim), bounds)
@@ -882,9 +882,9 @@ class CameraPreview(Gtk.Widget):
 # into the primitives below, and a painter only has to know how to stroke a
 # line, fill a radial gradient, and stroke a polyline.
 #
-# Colours are plain ``(r, g, b, a)`` floats rather than :class:`Gdk.RGBA` so the
+# Colors are plain ``(r, g, b, a)`` floats rather than :class:`Gdk.RGBA` so the
 # frame carries no toolkit types and can be produced, inspected and asserted on
-# in a test with nothing initialised.
+# in a test with nothing initialized.
 #
 # Coordinates are absolute pixels with the ring's transform already applied: the
 # success spring's scale and the failure shake's offset are baked into the
@@ -905,7 +905,7 @@ class DialTick(NamedTuple):
 class DialGlow(NamedTuple):
     """The soft light on the leading tick of a progress fill.
 
-    A radial gradient from :attr:`rgba` at the centre to the same colour at
+    A radial gradient from :attr:`rgba` at the center to the same color at
     zero alpha at :attr:`radius`.
     """
 
@@ -1026,7 +1026,7 @@ class DialModel:
         """Diameter of the circle this dial encloses, at *dial_size* pixels.
 
         ``2 * 0.86 * 0.42 * size``, from the spec's "preview circle sits at
-        0.86 x R".  Exposed so the enrolment wizard sizes its camera preview
+        0.86 x R".  Exposed so the enrollment wizard sizes its camera preview
         from the relationship rather than from a magic number that would
         silently stop matching if the ratios ever moved.
         """
@@ -1079,7 +1079,7 @@ class DialModel:
         """Move to *state*.  Returns whether anything actually restarted."""
         if state in (self.STATE_SUCCESS, self.STATE_FAILURE):
             # Freeze the ring as it stands.  Storing the *inputs* (phase,
-            # fraction, brightness) rather than 48 resolved colours means the
+            # fraction, brightness) rather than 48 resolved colors means the
             # frozen ring still re-resolves correctly if the theme changes
             # halfway through the beat.
             self._frozen_phase = self.phase_at(now_us)
@@ -1203,7 +1203,7 @@ class DialModel:
         """``(rgb, alpha, length)`` for one tick of the travelling wave.
 
         *length* is a multiple of L.  Reduced motion collapses this to the
-        even ring the spec describes: same colour, same resting opacity, no
+        even ring the spec describes: same color, same resting opacity, no
         boost -- so idle is still visibly dimmer than scanning and the states
         remain distinguishable without a single moving pixel.
         """
@@ -1294,7 +1294,7 @@ class DialModel:
 
         if self._state == self.STATE_FAILURE:
             source = self._frozen_appearance(index, palette, reduced)
-            # "0 -> 300ms  ticks desaturate to the muted colour and return to
+            # "0 -> 300ms  ticks desaturate to the muted color and return to
             # base length."  Under reduced motion there is no shake to carry
             # the message, so the dim is the whole of it -- one 200 ms fade.
             settle = (
@@ -1404,7 +1404,7 @@ class DialModel:
         scale, offset_x = self.ring_transform(now_us, radius, reduced)
 
         def place(x: float, y: float) -> tuple[float, float]:
-            """Apply the ring's pose: scale about the centre, then shake."""
+            """Apply the ring's pose: scale about the center, then shake."""
             return (cx + (x - cx) * scale + offset_x, cy + (y - cy) * scale)
 
         ticks: list[DialTick] = []
@@ -1423,7 +1423,7 @@ class DialModel:
             angle = 2.0 * math.pi * index / DIAL_TICKS
             dx, dy = math.sin(angle), -math.cos(angle)
 
-            # Ticks are centred on R rather than grown outwards from it, so the
+            # Ticks are centered on R rather than grown outwards from it, so the
             # ring's radius stays put as they lengthen and the success spring
             # cannot push the longest ones outside the widget.
             inner = radius - length / 2.0
@@ -1455,7 +1455,7 @@ class DialModel:
         drawing = self.check_draw(now_us, reduced)
         if drawing is not None:
             drawn, alpha = drawing
-            # "normalised to the ring's inner box (unit square, origin
+            # "normalized to the ring's inner box (unit square, origin
             # top-left)": the box the ring encloses, i.e. the same circle the
             # preview sits on.  Deliberately *not* run through place(): beats
             # two and three overlap between 260 ms and 420 ms, and a mark that
@@ -1567,7 +1567,7 @@ class FaceDial(_Animated, _Canvas):
     def __init__(
         self,
         natural_size: int = 300,
-        label: str = "Enrolment progress",
+        label: str = "Enrollment progress",
         **kwargs: object,
     ) -> None:
         super().__init__(content_width=natural_size, content_height=natural_size, **kwargs)
@@ -1635,7 +1635,7 @@ class FaceDial(_Animated, _Canvas):
         self._settle()
 
     def set_progress(self, fraction: float, *, animate: bool = True) -> None:
-        """Enrolment progress, 0-1.  Enters :attr:`STATE_PROGRESS`."""
+        """Enrollment progress, 0-1.  Enters :attr:`STATE_PROGRESS`."""
         self._model.set_progress(
             fraction,
             self._now_us(),
@@ -1643,7 +1643,7 @@ class FaceDial(_Animated, _Canvas):
         )
         self._settle()
 
-    #: Retained under its previous name: this is what the enrolment wizard has
+    #: Retained under its previous name: this is what the enrollment wizard has
     #: always called, and the semantics (move the fill, tweened) are unchanged.
     set_fraction = set_progress
 
@@ -1723,7 +1723,7 @@ class FaceDial(_Animated, _Canvas):
             return
 
         # The palette is resolved per snapshot rather than cached: libadwaita
-        # can switch the colour scheme mid-animation (night mode, a portal),
+        # can switch the color scheme mid-animation (night mode, a portal),
         # and a dial that finished its success beat in yesterday's palette
         # would be the only stale thing on screen.
         paint_dial_frame_gsk(
@@ -1836,14 +1836,14 @@ class ScanOverlay(_Animated, _Canvas):
             # extremes instead of ricocheting off them.
             elapsed_ms = (now - self._phase_start_us) / 1000.0
             phase = (elapsed_ms % SCAN_CYCLE_MS) / SCAN_CYCLE_MS
-            centre = (cy - radius) + ease_in_out_sine(phase) * (2.0 * radius)
+            center = (cy - radius) + ease_in_out_sine(phase) * (2.0 * radius)
         else:
             # Reduced motion: the band parks across the middle and only fades.
             # Removing it entirely would be defensible -- it is marked
             # PRESENTATION and carries no information -- but the circle visibly
             # changing when capture starts is worth keeping, and a stationary
             # wash is not motion.
-            centre = cy
+            center = cy
 
         accent = accent_rgba()
         band = radius * 0.55
@@ -1851,23 +1851,23 @@ class ScanOverlay(_Animated, _Canvas):
         snapshot.push_rounded_clip(circle)
         try:
             # The band. Transparent at both ends, so the gradient's edge
-            # colours extend to the rest of the circle as pure transparency.
+            # colors extend to the rest of the circle as pure transparency.
             snapshot.append_linear_gradient(
                 bounds,
-                _point(cx, centre - band),
-                _point(cx, centre + band),
+                _point(cx, center - band),
+                _point(cx, center + band),
                 [
                     _stop(0.0, with_alpha(accent, 0.0)),
                     _stop(0.5, with_alpha(accent, 0.26 * intensity)),
                     _stop(1.0, with_alpha(accent, 0.0)),
                 ],
             )
-            # A brighter hairline at the centre of the band gives the sweep an
+            # A brighter hairline at the center of the band gives the sweep an
             # edge to follow; the gradient alone reads as a flicker.
             snapshot.append_linear_gradient(
-                Graphene.Rect().init(cx - radius, centre - 1.0, 2.0 * radius, 2.0),
-                _point(cx - radius, centre),
-                _point(cx + radius, centre),
+                Graphene.Rect().init(cx - radius, center - 1.0, 2.0 * radius, 2.0),
+                _point(cx - radius, center),
+                _point(cx + radius, center),
                 [
                     _stop(0.0, with_alpha(accent, 0.0)),
                     _stop(0.5, with_alpha(accent, 0.55 * intensity)),
@@ -1976,11 +1976,11 @@ class StatusBadge(_Animated, _Canvas):
             return
 
         circle_t, glyph_t = self._phases()
-        colour = success_rgba() if self._state == self.STATE_SUCCESS else failure_rgba()
+        color = success_rgba() if self._state == self.STATE_SUCCESS else failure_rgba()
         opacity = self._opacity()
         if opacity <= 0.0:
             return
-        colour = with_alpha(colour, opacity)
+        color = with_alpha(color, opacity)
         cx, cy = width / 2.0, height / 2.0
         stroke = _stroke(self._thickness)
 
@@ -1989,18 +1989,18 @@ class StatusBadge(_Animated, _Canvas):
         disc = Gsk.PathBuilder.new()
         disc.add_circle(_point(cx, cy), radius)
         snapshot.append_fill(
-            disc.to_path(), Gsk.FillRule.WINDING, with_alpha(colour, 0.12 * opacity)
+            disc.to_path(), Gsk.FillRule.WINDING, with_alpha(color, 0.12 * opacity)
         )
 
         arc = _arc_path(cx, cy, radius, circle_t)
         if arc is not None:
-            snapshot.append_stroke(arc, stroke, colour)
+            snapshot.append_stroke(arc, stroke, color)
 
         if glyph_t <= 0.0:
             return
 
         for path in self._glyph_paths(cx, cy, radius, glyph_t):
-            snapshot.append_stroke(path, stroke, colour)
+            snapshot.append_stroke(path, stroke, color)
 
     def _glyph_paths(
         self, cx: float, cy: float, radius: float, t: float

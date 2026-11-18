@@ -184,7 +184,7 @@ class ReportTests(_HardwareCase):
         self.assertEqual((report["configured_device"], report["selected_device"]), ("auto", "/dev/video2"))
         self.assertEqual(_FakeCamera.opened, ["/dev/video2"])
         kinds = {n["path"]: n["kind"] for n in report["nodes"]}
-        self.assertEqual(kinds, {"/dev/video0": "colour", "/dev/video1": "metadata", "/dev/video2": "infrared"})
+        self.assertEqual(kinds, {"/dev/video0": "color", "/dev/video1": "metadata", "/dev/video2": "infrared"})
         self.assertEqual(report["nodes"][2]["formats"], {"GREY": ["640x360"]})
         self.assertIn("strobes", report["verdict"][0])
 

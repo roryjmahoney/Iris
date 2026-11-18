@@ -3,7 +3,7 @@
 # ============================================================================
 #
 #  pam_iris.so is loaded into sudo, su, login and the GNOME greeter, so it is
-#  built with warnings on and optimisation at -O2 and nothing else: no external
+#  built with warnings on and optimization at -O2 and nothing else: no external
 #  libraries beyond libpam itself, no generated code, no link-time surprises.
 #
 #      make            build pam_iris.so in this directory
@@ -42,7 +42,7 @@ LDLIBS  ?= -lpam
 #                   shared object" the first time someone runs sudo.
 #   -z relro -z now  full RELRO: no writable GOT in a module loaded by every
 #                   setuid program on the machine.
-#   _FORTIFY_SOURCE requires an optimising build to do anything, hence -O2
+#   _FORTIFY_SOURCE requires an optimizing build to do anything, hence -O2
 #                   staying in the default CFLAGS above.
 REQUIRED_CFLAGS  := -fPIC -shared -D_FORTIFY_SOURCE=2 -fstack-protector-strong
 REQUIRED_LDFLAGS := -Wl,--no-undefined -Wl,-z,relro -Wl,-z,now
@@ -144,7 +144,7 @@ test: $(TARGET)
 	@echo "Expect: PAM_SUCCESS on a match; on any failure pam_deny.so denies,"
 	@echo "which proves 'default=ignore' really did fall through."
 	@echo
-	@echo "Timeout behaviour with irisd stopped (must return promptly,"
+	@echo "Timeout behavior with irisd stopped (must return promptly,"
 	@echo "not hang):"
 	@echo "  sudo systemctl stop irisd"
 	@echo "  time sudo pamtester -v iris-test $$USER authenticate"

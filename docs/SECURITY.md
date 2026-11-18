@@ -67,7 +67,7 @@ stacking instructions.
    from social media and holds a phone or a print in front of the camera.
    *Defended* — see §3.
 2. **Unprivileged local user on the same machine.** A logged-in account trying
-   to read templates, drive enrolment, or forge an authentication.
+   to read templates, drive enrollment, or forge an authentication.
    *Defended* — see §5, §6.
 3. **Thief with the disk.** Someone who pulls the SSD and reads it elsewhere.
    *Defended where a TPM is usable* — see §4.
@@ -115,8 +115,8 @@ from a face without extra hardware.
 ### The tests
 
 `src/iris/liveness.py` runs six checks per frame, on the **raw** frame, in this
-order. (Recognition uses a CLAHE-equalised copy; liveness deliberately does
-not, because CLAHE would rescale a near-black screen region up to mid-grey and
+order. (Recognition uses a CLAHE-equalized copy; liveness deliberately does
+not, because CLAHE would rescale a near-black screen region up to mid-gray and
 amplify its sensor noise into apparent texture, erasing both signals below.)
 
 | # | Test | Rejects | Reason code |
@@ -185,8 +185,8 @@ authentication — the protocol collapses every rejection into the single reason
 `spoof_suspected`. Telling an attacker which test they tripped hands them a
 tuning signal. The specific code is logged locally at debug level.
 
-Enrolment *does* return human-readable positioning hints, because there is no
-attacker to help at enrolment time and a user who cannot get a template
+Enrollment *does* return human-readable positioning hints, because there is no
+attacker to help at enrollment time and a user who cannot get a template
 recorded will simply give up.
 
 ---
@@ -228,11 +228,11 @@ Design points and why:
   leaks the XOR of plaintexts and the GCM authentication subkey.
 * **A failed tag is an error, never "no templates enrolled".** Silently
   treating tampering as an empty store would hide an attack. The daemon maps
-  it to `not_enrolled` over the wire (the remedy — re-enrol — is the same) and
+  it to `not_enrolled` over the wire (the remedy — re-enroll — is the same) and
   logs the real cause loudly.
 * **All writes are atomic**: temp file in the same directory, `fsync`,
   `os.replace`, then `fsync` on the directory so the rename itself is durable.
-  A power cut mid-enrolment leaves the previous templates intact rather than a
+  A power cut mid-enrollment leaves the previous templates intact rather than a
   truncated file that would lock the user out. `os.replace` also never follows
   a pre-existing symlink at the destination.
 * **Symlinks are refused**, for both `/var/lib/iris` itself and the individual
@@ -245,7 +245,7 @@ Design points and why:
 * **Usernames are validated** against `^[A-Za-z0-9_][A-Za-z0-9_.-]{0,31}\$?$`
   before becoming a path component — deliberately stricter than `useradd`'s
   `NAME_REGEX`. This check exists in **both** `iris.store` and `iris.daemon`;
-  the duplication is intentional defence in depth.
+  the duplication is intentional defense in depth.
 * **Every mutating operation asserts `euid == 0`** rather than producing a
   half-written, wrongly-owned tree.
 
@@ -332,7 +332,7 @@ anything else left it `0755`, and refuses outright if the path is a symlink —
 a symlink there would let whoever planted it redirect the socket, and the
 daemon's own `chmod`/`chown`, into a directory they control.
 
-### Authorisation
+### Authorization
 
 Two independent controls:
 
@@ -341,7 +341,7 @@ Two independent controls:
 2. **`SO_PEERCRED` on every connection.** The peer's uid must be 0 or the
    connection is refused with an explanatory error. The kernel fills this in at
    `connect()` time and the client cannot forge it, which makes it a real
-   authorisation check rather than a hint.
+   authorization check rather than a hint.
 
 The second exists because the first is a packaging property. A future unit-file
 change that loosened the socket mode must not silently open a root daemon to
@@ -409,7 +409,7 @@ hard failure.** The daemon runs as root and a checkout lives in a user-writable
 home directory; allowing the fallback there would mean a broken or partial
 install silently causes a root process to load an ONNX graph an unprivileged
 user can rewrite. That is both a parser attack surface and a way to swap in a
-recogniser that matches any face.
+recognizer that matches any face.
 
 ---
 
@@ -432,7 +432,7 @@ No image processing. No secrets. No device nodes. No linked libraries beyond
 
 ### Exactly one success path
 
-`rv` is initialised to `PAM_AUTH_ERR` and is assigned `PAM_SUCCESS` from a
+`rv` is initialized to `PAM_AUTH_ERR` and is assigned `PAM_SUCCESS` from a
 single branch: the daemon answered, in a well-formed framed message, with a
 top-level `"ok": true`. Daemon missing, socket refused, permission denied, short
 write, truncated reply, oversized reply, unparseable JSON, missing `ok` key,
@@ -486,7 +486,7 @@ name slowly does not eat the camera's budget. Default budget 8 s, clamped to
   refuses anything it does not fully understand. Reply buffer is a fixed 8 KiB;
   at most a handful of framed lines are read.
 * **The reply is never logged verbatim.** Only a length-capped,
-  character-class-sanitised copy of the `reason` token reaches syslog, so a
+  character-class-sanitized copy of the `reason` token reaches syslog, so a
   malformed or hostile reply cannot inject newlines or control sequences into
   the system log.
 * The user-facing message is chosen from a fixed table *in the module*, keyed by
@@ -508,7 +508,7 @@ SPEC SAFETY rule 4: `max_failures` within `lockout_seconds` yields the reason
 
 * **Defaults**: 5 failures inside 60 seconds. `lockout_seconds = 0` disables the
   lockout entirely; `max_failures <= 0` disables face auth (always locked). Both
-  are honoured rather than clamped so the config can express either policy.
+  are honored rather than clamped so the config can express either policy.
 * **Timestamps come from `time.monotonic()`**, so NTP steps, suspend/resume and
   DST cannot shorten — or extend forever — a lockout.
 * **Deliberately not persisted.** A reboot clearing the lockout is acceptable:
@@ -518,7 +518,7 @@ SPEC SAFETY rule 4: `max_failures` within `lockout_seconds` yields the reason
 * **Bounded memory.** An LRU capped at 1024 users, with a per-user history cap
   of 64 entries and pruning on read, so an attacker spraying random usernames at
   the socket cannot grow it without bound.
-* A successful authentication, or a fresh enrolment, resets the user's history.
+* A successful authentication, or a fresh enrollment, resets the user's history.
 * Only genuine authentication failures count. Administrative conditions —
   `disabled`, `not_enrolled` — do not.
 * The lockout response carries `retry_after` so the CLI and GUI can say
@@ -563,7 +563,7 @@ mitigations that exist are about *accidents*, not attackers:
 
 ## 9. Reporting a vulnerability
 
-**Please do not open a public issue for anything that lets an unauthorised
+**Please do not open a public issue for anything that lets an unauthorized
 person authenticate, read templates, or recover the master key.** Report it
 privately to the maintainer of this repository first, so a fix can ship before
 the technique is public.

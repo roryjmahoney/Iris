@@ -17,7 +17,7 @@ tried first, because it is the authoritative interface and costs no prompt.
 
 **2. Only one process can hold /dev/video2 at a time.**
 V4L2 capture nodes are exclusive.  The GUI's live preview and the privileged
-enrolment process cannot both have the IR camera open, so :class:`PreviewWorker`
+enrollment process cannot both have the IR camera open, so :class:`PreviewWorker`
 must be fully stopped -- thread joined, ``VideoCapture`` released -- before
 :class:`EnrollProcess` starts.  :meth:`PreviewWorker.stop` is asynchronous for
 exactly this reason: it hands control back to the main loop and calls back when
@@ -50,7 +50,7 @@ an indeterminate "Working" state rather than a frozen ring.
 
 ``config-set`` is also accepted spelled ``config set``; a usage error from one
 spelling falls through to the other (see :func:`_run_cli`).  Nothing else is
-guessed -- an unrecognised command surfaces as a plain-language error naming the
+guessed -- an unrecognized command surfaces as a plain-language error naming the
 exact command that failed, so the user can run it in a terminal and see why.
 """
 
@@ -92,12 +92,12 @@ _MAX_STDERR_BYTES: Final[int] = 8 * 1024
 
 # pkexec's own exit codes, distinct from the child's (pkexec(1) "EXIT STATUS").
 _PKEXEC_DISMISSED: Final[int] = 126   # authentication failed or dialog dismissed
-_PKEXEC_NOT_AUTHORISED: Final[int] = 127  # not authorised, or command not found
+_PKEXEC_NOT_AUTHORIZED: Final[int] = 127  # not authorized, or command not found
 
 # An argparse usage failure, which is how we detect "this CLI spells the
 # subcommand differently" and fall through to the next spelling.
 _USAGE_ERROR_RE: Final[re.Pattern[str]] = re.compile(
-    r"invalid choice|unrecognized argument|unrecognised argument|"
+    r"invalid choice|unrecognized argument|unrecognized argument|"
     r"no such (command|option)|^usage:",
     re.IGNORECASE | re.MULTILINE,
 )
@@ -124,10 +124,10 @@ class BackendError(Exception):
         self.retryable = retryable
 
 
-class AuthorisationCancelled(BackendError):
+class AuthorizationCancelled(BackendError):
     """The user dismissed the polkit prompt, or it timed out.
 
-    Distinguished from a real failure because there is nothing to apologise
+    Distinguished from a real failure because there is nothing to apologize
     for and nothing to diagnose -- the correct UI is a quiet return to the
     previous screen with the action still available.
     """
@@ -188,7 +188,7 @@ def iris_binary() -> str | None:
 
     An absolute path matters for ``pkexec``: it refuses to run anything it
     cannot resolve to a real file, and resolving it ourselves means the polkit
-    dialog names the binary the user is actually authorising.
+    dialog names the binary the user is actually authorizing.
     """
     found = shutil.which("iris")
     if found:
@@ -258,7 +258,7 @@ class Face:
         try:
             # The store writes RFC 3339 with a 'Z' suffix, which
             # fromisoformat only learned to accept in 3.11 -- fine on 3.14,
-            # but normalise anyway so a hand-edited stamp still renders.
+            # but normalize anyway so a hand-edited stamp still renders.
             stamp = datetime.fromisoformat(self.created.replace("Z", "+00:00"))
         except ValueError:
             return ""
@@ -280,7 +280,7 @@ class CameraInfo:
 
     @property
     def subtitle(self) -> str:
-        kind = "Infrared" if self.is_ir else "Colour"
+        kind = "Infrared" if self.is_ir else "Color"
         formats = ", ".join(self.formats) if self.formats else "unknown format"
         return f"{kind} · {self.path} · {formats}"
 
@@ -442,7 +442,7 @@ def _final_json(result: _Result) -> dict[str, Any]:
             payload = parsed
 
     if result.returncode == _PKEXEC_DISMISSED and payload is None:
-        raise AuthorisationCancelled()
+        raise AuthorizationCancelled()
 
     if payload is not None and payload.get("ok"):
         return payload
@@ -465,9 +465,9 @@ def _failure_error(result: _Result, payload: dict[str, Any] | None) -> BackendEr
             return BackendError(str(payload["error"]), detail)
 
     if result.returncode == _PKEXEC_DISMISSED:
-        return AuthorisationCancelled()
+        return AuthorizationCancelled()
 
-    if result.returncode == _PKEXEC_NOT_AUTHORISED:
+    if result.returncode == _PKEXEC_NOT_AUTHORIZED:
         return BackendError(
             "This account is not allowed to change face data.",
             f"pkexec exited 127 for: {command}\n{detail}",
@@ -608,7 +608,7 @@ def save_config(cfg: dict[str, Any]) -> None:
 
 
 # --------------------------------------------------------------------------
-# enrolment
+# enrollment
 # --------------------------------------------------------------------------
 
 #: If no progress line arrives for this long while the helper is still running,
@@ -620,7 +620,7 @@ _STALL_SECONDS: Final[float] = 6.0
 
 @dataclass(frozen=True, slots=True)
 class EnrollProgress:
-    """One progress update from the enrolment helper."""
+    """One progress update from the enrollment helper."""
 
     fraction: float
     hint: str
@@ -631,7 +631,7 @@ class EnrollProgress:
 class EnrollProcess:
     """Runs ``pkexec iris enroll`` and streams its progress to the UI.
 
-    Enrolment writes to ``/var/lib/iris``, so it has to happen as root; the GUI
+    Enrollment writes to ``/var/lib/iris``, so it has to happen as root; the GUI
     is a spectator that parses stdout.  Three threads are involved: one draining
     stdout, one draining stderr (a full pipe would deadlock the helper), and one
     waiting for exit.  Every callback is re-entered on the GTK main loop via
@@ -689,7 +689,7 @@ class EnrollProcess:
             privileged=True,
         )
         self._argv = argv
-        _LOG.info("starting enrolment: %s", " ".join(argv))
+        _LOG.info("starting enrollment: %s", " ".join(argv))
 
         try:
             self._proc = subprocess.Popen(
@@ -704,7 +704,7 @@ class EnrollProcess:
             )
         except OSError as exc:
             raise BackendError(
-                "Iris could not start the enrolment helper.", str(exc)
+                "Iris could not start the enrollment helper.", str(exc)
             ) from exc
 
         self._last_progress_at = time.monotonic()
@@ -714,7 +714,7 @@ class EnrollProcess:
         self._stall_source = GLib.timeout_add(1000, self._check_stall)
 
     def cancel(self) -> None:
-        """Stop the enrolment, as far as an unprivileged parent is able to.
+        """Stop the enrollment, as far as an unprivileged parent is able to.
 
         ``pkexec`` ``execve``s the helper in its own process after raising
         privileges, so once the user has authenticated the process is owned by
@@ -890,7 +890,7 @@ def _as_int(value: Any) -> int | None:
         return int(value)
     except (TypeError, ValueError, OverflowError):
         # OverflowError: int(float("inf")). Python's json accepts Infinity, and
-        # an exception here would kill the stdout reader thread mid-enrolment.
+        # an exception here would kill the stdout reader thread mid-enrollment.
         return None
 
 
@@ -1020,7 +1020,7 @@ class PreviewWorker:
 
         ``on_stopped`` fires on the main loop once the ``VideoCapture`` has
         actually been released -- which is the moment, and the only moment, at
-        which it is safe to hand ``/dev/video2`` to the enrolment helper.  The
+        which it is safe to hand ``/dev/video2`` to the enrollment helper.  The
         wait is short: :meth:`iris.camera.Camera.frames` checks its deadline
         between reads and a read returns within one frame period (~67 ms at
         15 fps).
@@ -1157,7 +1157,7 @@ class PreviewWorker:
         ))
 
     def _clahe(self) -> Any:
-        """The contrast equaliser, built once and reused.
+        """The contrast equalizer, built once and reused.
 
         Creating one per frame is pure waste: the object holds no state between
         ``apply`` calls, and this runs 7-8 times a second for as long as the

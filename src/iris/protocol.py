@@ -85,10 +85,10 @@ REASONS: Final[frozenset[str]] = frozenset({
 
 #: Human-readable text for each reason code, for CLI and GUI use.
 REASON_TEXT: Final[dict[str, str]] = {
-    REASON_MATCH: "Face recognised.",
+    REASON_MATCH: "Face recognized.",
     REASON_NO_MATCH: "Face did not match any enrolled model.",
     REASON_NO_FACE: "No face was visible to the infrared camera.",
-    REASON_TIMEOUT: "Timed out before a face could be recognised.",
+    REASON_TIMEOUT: "Timed out before a face could be recognized.",
     REASON_CAMERA_ERROR: "The infrared camera could not be used.",
     REASON_NOT_ENROLLED: "No face is enrolled for this user.",
     REASON_DISABLED: "Face authentication is disabled.",
@@ -137,9 +137,9 @@ class MalformedMessage(ProtocolError):
 # --------------------------------------------------------------------------
 
 def encode_message(obj: Mapping[str, Any]) -> bytes:
-    """Serialise *obj* to a single framed line.
+    """Serialize *obj* to a single framed line.
 
-    :raises MalformedMessage: *obj* is not a JSON-serialisable object.
+    :raises MalformedMessage: *obj* is not a JSON-serializable object.
     :raises MessageTooLarge: the encoded line exceeds the cap.
     """
     if not isinstance(obj, Mapping):
@@ -348,7 +348,7 @@ def stream_request(
 ) -> Iterator[dict[str, Any]]:
     """Send *req* and yield every response message until the final one.
 
-    Used by the enrolment UI, where the daemon emits ``{"progress": …}`` lines
+    Used by the enrollment UI, where the daemon emits ``{"progress": …}`` lines
     before its final ``{"ok": …}``.  The connection is closed when the iterator
     is exhausted, closed or garbage-collected.
 

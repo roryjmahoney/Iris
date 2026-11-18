@@ -103,7 +103,7 @@ class MergeAndTypeTests(_ConfigCase):
             with self.subTest(line=line):
                 cfg = self.load(f"[{section}]\n{line}\nheight = 240\n")
                 self.assertEqual(cfg[section][key], DEFAULTS[section][key])
-                self.assertEqual(cfg["camera"]["height"], 240)  # neighbours survive
+                self.assertEqual(cfg["camera"]["height"], 240)  # neighbors survive
 
     def test_int_is_widened_to_float(self) -> None:
         cfg = self.load("[auth]\ntimeout = 8\n[recognition]\nthreshold = 1\n")

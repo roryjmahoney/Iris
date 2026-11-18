@@ -12,7 +12,7 @@ region reads dark, flat and structureless, or -- if the panel's glass catches
 the emitter -- as a blown-out specular hotspot. Either signature is easy to
 separate from a real face without any extra hardware.
 
-This is the same class of defence Windows Hello's IR-only mode relies on, and
+This is the same class of defense Windows Hello's IR-only mode relies on, and
 it is genuinely effective against the attack that actually happens to laptop
 users: someone holding up a phone with a photo from social media.
 
@@ -44,7 +44,7 @@ Why raw pixels
 --------------
 :class:`iris.engine.FaceEngine` applies CLAHE before detection because
 recognition wants lighting invariance. Liveness wants the exact opposite. CLAHE
-would rescale a near-black screen region up to mid-grey and amplify its sensor
+would rescale a near-black screen region up to mid-gray and amplify its sensor
 noise into apparent texture -- erasing both signals this module depends on. So
 every measurement here is taken on the untouched frame from
 :meth:`iris.camera.Camera.frames`.
@@ -120,11 +120,11 @@ class LivenessChecker:
         # Fraction of the region allowed to be at/near full scale. A glossy
         # phone or photo print can bounce the emitter straight back as a
         # mirror-like hotspot; that is a spoof signature, and it also destroys
-        # the texture the recogniser needs.
+        # the texture the recognizer needs.
         self.max_saturated = float(live.get("max_saturated", 0.20))
         self._saturation_level = int(live.get("saturation_level", 250))
 
-        # Standard deviation floor: catches uniformly grey regions that happen
+        # Standard deviation floor: catches uniformly gray regions that happen
         # to sit above the brightness floor (e.g. a sheet of paper).
         self.min_contrast = float(live.get("min_contrast", 8.0))
 
@@ -189,7 +189,7 @@ class LivenessChecker:
     ) -> dict[str, float]:
         """Return the raw statistics :meth:`check` decides on.
 
-        Exposed for the enrolment GUI's diagnostics view and for recalibrating
+        Exposed for the enrollment GUI's diagnostics view and for recalibrating
         thresholds against real hardware; it has no side effects and is not part
         of the module contract in SPEC.md.
 
@@ -241,7 +241,7 @@ class LivenessChecker:
 
         Args:
             gray: the **raw** 2-D uint8 IR frame the face was detected in -- not
-                a CLAHE-equalised copy (see the module docstring).
+                a CLAHE-equalized copy (see the module docstring).
             face_row: the 15-column YuNet row from
                 :meth:`iris.engine.FaceEngine.detect`; only the bounding box
                 (columns 0-3) is used.
@@ -341,7 +341,7 @@ class LivenessChecker:
         arr = np.asarray(gray)
         if arr.ndim == 3:
             # Tolerate the BGR preview stream; note that this is a luminance
-            # conversion only -- no equalisation, so absolute levels survive.
+            # conversion only -- no equalization, so absolute levels survive.
             if arr.shape[2] == 3:
                 arr = cv2.cvtColor(arr, cv2.COLOR_BGR2GRAY)
             elif arr.shape[2] == 4:

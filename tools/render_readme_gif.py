@@ -42,7 +42,7 @@ DARK_BG = (0.055, 0.055, 0.065)
 
 # The website places the dial inside a solid portion of its authentication
 # card. These values mirror --dial-surface in site/styles.css so the raster
-# animation has no visible rectangular edge. Keep the README colours above
+# animation has no visible rectangular edge. Keep the README colors above
 # separate: GitHub's own light and dark canvases are different surfaces.
 SITE_LIGHT_BG = (1.0, 1.0, 1.0)
 SITE_DARK_BG = (23 / 255, 24 / 255, 29 / 255)
@@ -164,7 +164,7 @@ def main() -> int:
     parser.add_argument(
         "--light",
         action="store_true",
-        help="render the light-theme variant for GitHub's light colour scheme",
+        help="render the light-theme variant for GitHub's light color scheme",
     )
     parser.add_argument(
         "--both",

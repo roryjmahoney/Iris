@@ -28,7 +28,7 @@
  *  permission denied, short write, truncated reply, oversized reply,
  *  unparseable JSON, missing "ok" key, deadline expired, malloc-free internal
  *  error, unknown user, control characters in the username — returns a
- *  non-success code.  `rv` is initialised to PAM_AUTH_ERR and is only ever
+ *  non-success code.  `rv` is initialized to PAM_AUTH_ERR and is only ever
  *  assigned PAM_SUCCESS from the single `authenticated == true` branch, which
  *  is re-checked once more immediately before returning.
  *
@@ -138,7 +138,7 @@
  *  real key, and refuses anything it does not fully understand.
  *
  *  The reply is never logged verbatim: only a length-capped, character-class
- *  sanitised copy of the `reason` token ever reaches syslog, so a malformed
+ *  sanitized copy of the `reason` token ever reaches syslog, so a malformed
  *  or hostile reply cannot inject newlines or control sequences into the
  *  system log.
  *
@@ -277,7 +277,7 @@ static bool json_is_ws(char c)
  * inject newlines, escape sequences or fake log fields.  Applied to the
  * `reason` value before it is logged; the raw reply is never logged.
  */
-static void sanitise_token(char *s)
+static void sanitize_token(char *s)
 {
 	for (; *s != '\0'; s++) {
 		unsigned char c = (unsigned char)*s;
@@ -750,7 +750,7 @@ static void parse_args(pam_handle_t *pamh, int argc, const char **argv,
 			/*
 			 * Clamp in floating point *before* converting: casting a
 			 * double outside long's range (timeout=1e300, inf) is
-			 * undefined behaviour, not a clamp.
+			 * undefined behavior, not a clamp.
 			 */
 			long ms;
 			if (secs * 1000.0 <= (double)IRIS_MIN_TIMEOUT_MS)
@@ -1041,20 +1041,20 @@ static ir_status read_reply(pam_handle_t *pamh, const struct iris_opts *o, int f
 				}
 				/*
 				 * Guarded: with reason_cap == 0 nothing above
-				 * ever wrote a NUL, so sanitise_token() would
-				 * walk uninitialised stack looking for one.
+				 * ever wrote a NUL, so sanitize_token() would
+				 * walk uninitialized stack looking for one.
 				 * Today every caller passes 32, but this
 				 * function's contract allows 0.
 				 */
 				if (reason_cap > 0)
-					sanitise_token(reason_out);
+					sanitize_token(reason_out);
 
 				*ok_out = ok;
 				return IR_OK;
 			}
 
 			/*
-			 * No "ok": per SPEC.md this is an enrolment progress
+			 * No "ok": per SPEC.md this is an enrollment progress
 			 * line, which `auth` never emits.  Discard it, count it
 			 * against the line budget, and keep looking.
 			 */
@@ -1125,7 +1125,7 @@ static int pam_code_for_reason(const char *reason)
 static const char *user_message_for_reason(const char *reason)
 {
 	if (strcmp(reason, "no_match") == 0)
-		return "Iris: face not recognised.";
+		return "Iris: face not recognized.";
 	if (strcmp(reason, "no_face") == 0)
 		return "Iris: no face detected.";
 	if (strcmp(reason, "timeout") == 0)
@@ -1239,7 +1239,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
 
 	/*
 	 * Built with snprintf and an integral seconds.milliseconds rendering.
-	 * "%f" is NOT used on purpose: it honours LC_NUMERIC, and under a
+	 * "%f" is NOT used on purpose: it honors LC_NUMERIC, and under a
 	 * locale such as de_DE it would emit "7,000" — syntactically invalid
 	 * JSON that the daemon would reject on every login.
 	 */
@@ -1319,7 +1319,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **ar
 
 		rv = pam_code_for_reason(reason);
 
-		/* reason[] is sanitised; the raw reply is never logged. */
+		/* reason[] is sanitized; the raw reply is never logged. */
 		pam_syslog(pamh, LOG_NOTICE, "face authentication failed for '%s' (reason=%s)",
 			   user, reason[0] != '\0' ? reason : "unspecified");
 

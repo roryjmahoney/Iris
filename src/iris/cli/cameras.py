@@ -48,7 +48,7 @@ def cmd_cameras(args: argparse.Namespace) -> int:
         elif camera.get("is_ir"):
             kind = "infrared"
         else:
-            kind = "colour"
+            kind = "color"
         formats = camera.get("formats") or []
         rows.append([
             marker,
@@ -87,7 +87,7 @@ def cmd_cameras(args: argparse.Namespace) -> int:
 
     if not any(c.get("is_ir") for c in cameras):
         console.warn(
-            "no infrared camera was detected; face authentication on a colour "
+            "no infrared camera was detected; face authentication on a color "
             "camera can be defeated with a printed photograph"
         )
     elif not is_auto_device(configured) and not any(c.get("path") == configured for c in cameras):

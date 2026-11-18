@@ -287,9 +287,9 @@ print(cam["path"] + " (" + cam["name"] + ")" if cam else "")
 if [[ -n "$IR_CAMERA" ]]; then
   ok "infrared camera: $IR_CAMERA"
 elif compgen -G "/dev/video*" >/dev/null; then
-  warn "no infrared camera recognised — see step 1 of \"Next steps\" at the end"
+  warn "no infrared camera recognized — see step 1 of \"Next steps\" at the end"
 else
-  warn "no /dev/video* devices — enrolment will fail until a camera is available"
+  warn "no /dev/video* devices — enrollment will fail until a camera is available"
 fi
 
 command -v gcc >/dev/null || die "gcc missing. Install: sudo apt install build-essential"
@@ -721,7 +721,7 @@ if [[ $((WIRE_GDM + WIRE_SUDO + WIRE_POLKIT)) -gt 0 ]]; then
 else
   step "PAM"
   note "Not wired — this run installed the software only. That is the default."
-  note "Enrol a face first, test it, then re-run with --gdm (and optionally --sudo --polkit)."
+  note "Enroll a face first, test it, then re-run with --gdm (and optionally --sudo --polkit)."
 fi
 
 # ---------------------------------------------------------------------------
@@ -738,8 +738,8 @@ cat <<EOF
          • IR camera missing, or its light never turns on?  Run
            ${B}iris hardware-report${N} and paste the output into a hardware issue:
            ${B}https://github.com/roryjmahoney/Iris/issues/new?template=hardware_report.yml${N}
-    2. Enrol your face:        ${B}sudo iris enroll${N}
-    3. Check it recognises you:${B} iris test${N}
+    2. Enroll your face:        ${B}sudo iris enroll${N}
+    3. Check it recognizes you:${B} iris test${N}
     4. Settings app:           ${B}iris-settings${N}
 EOF
 if [[ -d "$EXT_DIR" ]] && [[ -n "$TARGET_USER" ]]; then
@@ -752,7 +752,7 @@ if [[ $((WIRE_GDM + WIRE_SUDO + WIRE_POLKIT)) -eq 0 ]]; then
 cat <<EOF
 
   ${BOLD}Face auth is installed but not yet active anywhere.${N}
-  Once enrolment works, turn it on:   ${B}sudo $0 --gdm${N}
+  Once enrollment works, turn it on:   ${B}sudo $0 --gdm${N}
 EOF
 fi
 cat <<EOF

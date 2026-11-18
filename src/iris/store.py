@@ -756,7 +756,7 @@ class TemplateStore:
                 {
                     "name": name,
                     "created": _now_iso(),
-                    # float(): json cannot serialise numpy scalars.
+                    # float(): json cannot serialize numpy scalars.
                     "embeddings": [[float(x) for x in vec] for vec in vectors],
                 }
             )
@@ -1051,7 +1051,7 @@ class FailureTracker:
 
         ``max_failures <= 0`` disables face auth entirely (always locked);
         ``lockout_seconds <= 0`` disables the lockout (never locked).  Both are
-        honoured rather than clamped so config.toml can express either policy.
+        honored rather than clamped so config.toml can express either policy.
         """
         if lockout_seconds <= 0:
             return False

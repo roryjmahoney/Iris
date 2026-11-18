@@ -495,7 +495,7 @@ static void test_user_messages_and_logs(void)
 	struct script sc = {.reply = "{\"ok\":false,\"reason\":\"no_match\"}\n"};
 	struct result r = run(&sc, 0, NULL, 0);
 
-	CHECK(strcmp(prompts, "Iris: look at the infrared camera...|Iris: face not recognised.|") == 0,
+	CHECK(strcmp(prompts, "Iris: look at the infrared camera...|Iris: face not recognized.|") == 0,
 	      "prompts: %s", prompts);
 
 	/* Normal states are not announced as errors. */
@@ -516,7 +516,7 @@ static void test_user_messages_and_logs(void)
 	r = run(&sc, 0, NULL, 0);
 	CHECK(r.rc == PAM_AUTH_ERR, "odd reason -> %d", r.rc);
 	CHECK(strchr(last_log, '\n') == NULL && strchr(last_log, '\x1b') == NULL,
-	      "unsanitised log line: %s", last_log);
+	      "unsanitized log line: %s", last_log);
 	CHECK(strstr(last_log, "reason=no.match") != NULL, "log line: %s", last_log);
 	CHECK(strcmp(prompts, "Iris: look at the infrared camera...|") == 0, "odd reason prompts: %s", prompts);
 }

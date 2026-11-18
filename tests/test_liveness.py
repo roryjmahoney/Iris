@@ -214,7 +214,7 @@ class MeasurementTests(unittest.TestCase):
         black = np.zeros((HEIGHT, WIDTH), dtype=np.uint8)
         self.assertEqual(_checker().measure(black, FACE_ROW)["ratio"], 0.0)
 
-    def test_colour_preview_frames_keep_their_levels(self) -> None:
+    def test_color_preview_frames_keep_their_levels(self) -> None:
         gray = _live(1)
         expected = _checker().measure(gray, FACE_ROW)
         for code in (cv2.COLOR_GRAY2BGR, cv2.COLOR_GRAY2BGRA):
@@ -250,7 +250,7 @@ class MeasurementTests(unittest.TestCase):
 
 
 class ReasonContractTests(unittest.TestCase):
-    def test_every_rejection_reason_has_enrolment_guidance(self) -> None:
+    def test_every_rejection_reason_has_enrollment_guidance(self) -> None:
         rejections = set(REASONS) - {"live", "disabled"}
         self.assertEqual(set(daemon._LIVENESS_HINTS), rejections)
 

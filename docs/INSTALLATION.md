@@ -46,7 +46,7 @@ This installs:
 It starts `irisd` but changes no file under `/etc/pam.d`. That is the safe
 default.
 
-## 3. Enrol and verify
+## 3. Enroll and verify
 
 ```bash
 sudo iris enroll

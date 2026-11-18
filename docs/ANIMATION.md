@@ -3,7 +3,7 @@
 # Iris — Motion Specification
 
 One visual language, implemented twice: GNOME Shell (GJS + Cairo, lock screen and
-greeter) and GTK4 (Python + GskSnapshot/Cairo, enrolment and settings). Both must
+greeter) and GTK4 (Python + GskSnapshot/Cairo, enrollment and settings). Both must
 look like the same product.
 
 Heavily inspired by Apple's Face ID motion. Everything here is drawn from
@@ -11,7 +11,7 @@ primitives — arcs, ticks, strokes — not copied artwork.
 
 ## The core object: the dial
 
-A ring built from **N = 48** short radial tick marks, evenly spaced, centred on
+A ring built from **N = 48** short radial tick marks, evenly spaced, centered on
 the camera preview (or standing alone on the lock screen).
 
     radius        R      = 0.42 x min(width, height)
@@ -38,9 +38,9 @@ Calm and continuous. No hard edges, nothing strobing.
 Same wave, but faster (1600 ms/lap) and brighter (base 0.40). The ring also
 breathes: overall scale 1.0 -> 1.015 -> 1.0 on a 1400 ms sine.
 
-### 3. `progress` — enrolment only, 0..1
+### 3. `progress` — enrollment only, 0..1
 Ticks below the progress head are "filled": full opacity, length L * 1.5, accent
-colour. Above the head they stay idle. The head itself gets a soft glow. The
+color. Above the head they stay idle. The head itself gets a soft glow. The
 fill fraction is tweened, never snapped, with `ease-out-cubic` over 260 ms.
 
 ### 4. `success`
@@ -54,7 +54,7 @@ Three beats, 720 ms total. This is the moment that has to feel good.
                    0 -> 1 on ease-out-cubic. Ticks fade to 0.35 underneath
                    so the check reads clearly.
 
-Checkmark geometry, normalised to the ring's inner box (unit square, origin
+Checkmark geometry, normalized to the ring's inner box (unit square, origin
 top-left), stroked with round caps and joins, width 0.075:
 
     (0.26, 0.52) -> (0.44, 0.70) -> (0.75, 0.32)
@@ -67,7 +67,7 @@ Not alarming. No red flash, no cross.
 
     0   -> 420ms   horizontal shake: x = A * sin(2*pi*3*u) * (1-u),
                    A = 0.035 * R, u = t/420ms  (3 oscillations, damped to zero)
-    0   -> 300ms   ticks desaturate to the muted colour and return to base length
+    0   -> 300ms   ticks desaturate to the muted color and return to base length
 
 Then fall back to `idle` so the user can simply try again.
 
@@ -86,7 +86,7 @@ Nothing exceeds 1 s, per the design brief. All motion is driven by a monotonic
 clock and computed from elapsed time — never by counting frames — so it looks
 identical at 60 Hz and 144 Hz and degrades gracefully if frames are dropped.
 
-## Colour
+## Color
 
 Tokens, resolved per theme. The lock screen is always dark.
 
@@ -101,7 +101,7 @@ Tokens, resolved per theme. The lock screen is always dark.
 ## Accessibility
 
 `prefers-reduced-motion` (GTK: `Gtk.Settings:gtk-enable-animations`; Shell:
-`org.gnome.desktop.interface enable-animations`) must be honoured. When motion is
+`org.gnome.desktop.interface enable-animations`) must be honored. When motion is
 reduced: no wave, no shake, no spring. States become static — idle is a dim even
 ring, scanning is a brighter even ring, success draws the checkmark with a single
 200 ms fade, failure dims once. The information conveyed must not depend on

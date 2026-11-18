@@ -3,7 +3,7 @@
 Module layout::
 
     iris.gui.app        Adw.Application, main window, page navigation, main()
-    iris.gui.enroll     the enrolment wizard (preview, progress ring, result)
+    iris.gui.enroll     the enrollment wizard (preview, progress ring, result)
     iris.gui.settings   camera picker, thresholds, enrolled-face management
     iris.gui.widgets    reusable custom widgets (preview, ring, scan, badge)
     iris.gui.backend    camera worker threads and privileged-helper plumbing

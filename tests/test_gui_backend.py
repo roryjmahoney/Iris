@@ -1,4 +1,4 @@
-"""iris.gui.backend: CLI invocation, error wording, face listing and enrolment.
+"""iris.gui.backend: CLI invocation, error wording, face listing and enrollment.
 
 The real functions run real subprocesses; only the programs are fakes: a shell
 script stands in for ``iris`` and another for ``pkexec``.  GTK is not needed:
@@ -257,7 +257,7 @@ class FinalJsonTests(unittest.TestCase):
 
     def test_failure_messages_are_written_for_people(self) -> None:
         cases = [
-            (self.result(126), backend.AuthorisationCancelled, "Administrator approval"),
+            (self.result(126), backend.AuthorizationCancelled, "Administrator approval"),
             (self.result(127, stderr="nope"), backend.BackendError, "not allowed"),
             (self.result(1, '{"ok": false, "reason": "no_face"}'), backend.BackendError, "No face was visible"),
             (self.result(1, '{"ok": false, "error": "disk full"}'), backend.BackendError, "disk full"),
@@ -280,7 +280,7 @@ class FinalJsonTests(unittest.TestCase):
     def test_cancelled_prompt_with_a_json_error_reports_the_error(self) -> None:
         with self.assertRaises(backend.BackendError) as caught:
             backend._final_json(self.result(126, '{"ok": false, "error": "no such user"}'))
-        self.assertNotIsInstance(caught.exception, backend.AuthorisationCancelled)
+        self.assertNotIsInstance(caught.exception, backend.AuthorizationCancelled)
 
 
 # --------------------------------------------------------------------------- #
@@ -339,7 +339,7 @@ class FetchFacesTests(_FakeCli):
 
     def test_dismissed_prompt(self) -> None:
         self.write_script(self.pkexec, "exit 126\n")
-        with self.assertRaises(backend.AuthorisationCancelled):
+        with self.assertRaises(backend.AuthorizationCancelled):
             backend.clear_faces("alice")
 
 
@@ -382,7 +382,7 @@ class RunAsyncTests(unittest.TestCase):
 
 
 # --------------------------------------------------------------------------- #
-# Enrolment
+# Enrollment
 # --------------------------------------------------------------------------- #
 
 
@@ -459,7 +459,7 @@ class EnrollProcessTests(_FakeCli):
     def test_dismissed_prompt(self) -> None:
         self.write_script(self.pkexec, "exit 126\n")
         _proc, _progress, finished = self.enroll()
-        self.assertIsInstance(finished[0][1], backend.AuthorisationCancelled)
+        self.assertIsInstance(finished[0][1], backend.AuthorizationCancelled)
 
     def test_chatty_stderr_cannot_deadlock_the_helper(self) -> None:
         self.write_cli("head -c 1000000 /dev/zero | tr '\\0' 'x' | fold -w 100 >&2; echo '{\"ok\": true}'")

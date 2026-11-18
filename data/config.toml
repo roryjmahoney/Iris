@@ -12,7 +12,7 @@
 # To pin a specific node instead:
 #   sudo iris config set camera.device /dev/videoN
 # Never pick a node marked "metadata": it carries UVC headers, not images, and the
-# daemon refuses it. IR is strongly preferred over a colour camera: it works in the
+# daemon refuses it. IR is strongly preferred over a color camera: it works in the
 # dark and a phone or monitor replay emits no 850nm light.
 # If your IR camera is not found or does not work, run  iris hardware-report  and
 # open a hardware issue on GitHub with its output.
@@ -42,7 +42,7 @@ detect_score = 0.7
 
 model_dir = "/usr/share/iris/models"
 
-# Consecutive matching frames required before success. This is the real defence
+# Consecutive matching frames required before success. This is the real defense
 # against a single lucky frame; at ~15fps with half the frames dark, 3 costs ~0.4s.
 required_matches = 3
 

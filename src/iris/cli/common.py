@@ -32,7 +32,7 @@ def require_root(
     """Refuse a mutating command when we are not uid 0.
 
     Checked here, before any work, because the alternative is a half-finished
-    enrolment and a raw ``PermissionError`` traceback from :mod:`iris.store`.
+    enrollment and a raw ``PermissionError`` traceback from :mod:`iris.store`.
 
     *subject* names what the command would change, so the message is accurate
     for commands that touch the configuration rather than the templates.
@@ -212,7 +212,7 @@ def emit_json(payload: Mapping[str, Any]) -> None:
 
     The flush is not optional.  Python block-buffers stdout when it is a pipe,
     which is exactly how the GTK front end runs us, so an unflushed progress
-    line would sit in the buffer until the process exited and the enrolment
+    line would sit in the buffer until the process exited and the enrollment
     ring would jump from 0% to done.
     """
     print(json.dumps(payload, ensure_ascii=True), file=sys.stdout, flush=True)
@@ -294,7 +294,7 @@ def render_table(headers: Sequence[str], rows: Sequence[Sequence[str]], indent: 
     """Lay out a left-aligned column table, sized to its contents.
 
     Widths are computed from the *unpainted* strings the caller passes in, so
-    colour must be applied after layout (ANSI escapes have no display width but
+    color must be applied after layout (ANSI escapes have no display width but
     do have string length).
     """
     columns = len(headers)
@@ -320,7 +320,7 @@ def render_table(headers: Sequence[str], rows: Sequence[Sequence[str]], indent: 
 # --------------------------------------------------------------------------
 
 class ProgressRenderer:
-    """Live text progress bar for the daemon's streamed enrolment updates.
+    """Live text progress bar for the daemon's streamed enrollment updates.
 
     On a TTY it repaints one line in place::
 
@@ -382,7 +382,7 @@ class ProgressRenderer:
 
 
 def _clamp_fraction(value: Any) -> float:
-    """Normalise a daemon-supplied progress value into ``[0.0, 1.0]``.
+    """Normalize a daemon-supplied progress value into ``[0.0, 1.0]``.
 
     The contract says 0..1, but a daemon that sends 0..100 is a plausible bug
     and rendering a 4200%-full bar helps nobody, so percentages are folded in

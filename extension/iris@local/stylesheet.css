@@ -1,9 +1,9 @@
 /* Iris — GNOME Shell styling.
    Restrained, generous spacing, no heavy shadows. Reads on both the dark lock
-   screen and a light session. All colours are stated explicitly because the
+   screen and a light session. All colors are stated explicitly because the
    lock screen does not inherit the session theme.
 
-   The colour literals below are the dark column of the token table in
+   The color literals below are the dark column of the token table in
    docs/ANIMATION.md. St's CSS has no custom properties, so the values are
    repeated rather than referenced; extension.js carries the same five as
    PALETTE_DARK and the GTK app carries them as --iris-tick-* / --iris-dial-* in
@@ -26,7 +26,7 @@
        `spacing: 12px` already separates every child of that column. A margin
        here would be added to it, not instead of it.
      - no min-width. The same class sets `min-width: 30em` on the column, so the
-       pill is centred in a box that is already comfortably wider than it is.
+       pill is centered in a box that is already comfortably wider than it is.
 
    The padding is asymmetric because the dial is a circle in a square box: it
    already carries its own optical margin on the left, and the text does not. */
@@ -80,7 +80,7 @@
   padding-right: 2px;
 }
 
-/* App elevation dialog: same state machine, centred instead of pill-shaped.
+/* App elevation dialog: same state machine, centered instead of pill-shaped.
    PAM's plain scanning banner is hidden only after this visual is attached. */
 .iris-lock-hint.iris-polkit-hint {
   margin: 4px 24px;

@@ -159,7 +159,7 @@ class ModelResolutionTests(unittest.TestCase):
 
     def test_root_never_loads_models_from_the_checkout(self) -> None:
         # The checkout is user-writable; a root daemon loading it would let an
-        # unprivileged user swap in a recogniser that matches any face.
+        # unprivileged user swap in a recognizer that matches any face.
         with mock.patch.object(engine.os, "geteuid", return_value=0):
             with self.assertRaises(EngineError):
                 FaceEngine._resolve_model_dir(str(self.tmp / "missing"))
@@ -238,7 +238,7 @@ class EmbedTests(_EngineCase):
             self.engine.embed(_frame(1), FACE_ROW[:4])
 
     def test_preprocessing_is_shared_by_detect_and_embed(self) -> None:
-        # Enrolment and authentication must see identical pixels: any frame the
+        # Enrollment and authentication must see identical pixels: any frame the
         # engine accepts goes through the same _prepare() path.
         with mock.patch.object(self.engine, "_prepare", wraps=self.engine._prepare) as prep:
             frame = _frame(1)
@@ -261,7 +261,7 @@ class PrepareTests(_EngineCase):
         np.testing.assert_array_equal(out[..., 1], out[..., 2])
         self.assertGreater(out[..., 0].std(), dim.std())
 
-    def test_colour_and_sliced_inputs_match_grayscale(self) -> None:
+    def test_color_and_sliced_inputs_match_grayscale(self) -> None:
         gray = _frame(1)
         expected = self.engine._prepare(gray)
         np.testing.assert_array_equal(

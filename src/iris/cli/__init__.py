@@ -1,7 +1,7 @@
 """Iris command-line interface — installed as ``/usr/bin/iris``.
 
 Everything an administrator or a user needs to drive Iris from a terminal:
-enrolment, template management, a real authentication dry-run, camera
+enrollment, template management, a real authentication dry-run, camera
 enumeration, configuration editing and a diagnostic ``doctor``.
 
 Design rules that shape this package
@@ -22,7 +22,7 @@ early with a copy-pasteable ``sudo`` line rather than failing halfway with
 socket is ``0600 root:root``, so the ones that need the daemon explain that
 too instead of printing a bare "connection refused".
 
-**Output degrades gracefully.**  Colour is emitted only to a TTY (and never
+**Output degrades gracefully.**  Color is emitted only to a TTY (and never
 when ``NO_COLOR`` is set or ``--color never`` is passed), and every box-drawing
 or check-mark glyph has an ASCII fallback chosen from the output encoding, so
 piping into ``grep``, ``less -R`` or a systemd journal all behave.

@@ -19,7 +19,7 @@ from iris.cli.output import CommandError
 
 #: Permitted ranges for numeric settings, keyed by dotted name.
 #:
-#: These deliberately mirror the clamps in :func:`iris.config._sanitise`.  The
+#: These deliberately mirror the clamps in :func:`iris.config._sanitize`.  The
 #: loader *clamps* silently (a bad file must never stop a login); the CLI
 #: *refuses*, because someone typing a value at a prompt should be told it is
 #: out of range instead of discovering later that something else was stored.
@@ -196,7 +196,7 @@ def semantic_check(dotted: str, value: Any) -> list[str]:
                 if not camera.get("is_ir"):
                     warnings.append(
                         f"{device} ({camera.get('name', 'unknown')}) does not look "
-                        "like an infrared camera; face auth on a colour camera is "
+                        "like an infrared camera; face auth on a color camera is "
                         "trivially spoofed with a photograph"
                     )
                 break

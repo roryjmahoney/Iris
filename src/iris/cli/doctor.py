@@ -294,7 +294,7 @@ def check_store_directory() -> Check:
         return Check(
             "Template store", "warn",
             f"{path} does not exist yet",
-            hint=f"it is created on first enrolment:  sudo {PROG} enroll",
+            hint=f"it is created on first enrollment:  sudo {PROG} enroll",
         )
     except OSError as exc:
         return Check("Template store", "fail", f"cannot stat {path}: {exc}")
@@ -303,7 +303,7 @@ def check_store_directory() -> Check:
         return Check(
             "Template store", "fail",
             f"{path} is a symlink",
-            hint="the store refuses to follow it; remove the link and re-enrol",
+            hint="the store refuses to follow it; remove the link and re-enroll",
         )
     if not stat.S_ISDIR(info.st_mode):
         return Check("Template store", "fail", f"{path} is not a directory")
@@ -390,7 +390,7 @@ def check_socket(socket_path: str) -> Check:
             "; ".join(problems),
             hint=(
                 "a socket any user can write to lets unprivileged processes drive "
-                "enrolment and authentication; fix the daemon's umask/unit file"
+                "enrollment and authentication; fix the daemon's umask/unit file"
             ),
         )
     return Check("Socket permissions", "ok", f"{socket_path} is root:root 0600")
@@ -576,7 +576,7 @@ def check_camera(cfg: Mapping[str, Any], timeout: float) -> list[Check]:
         return [
             Check(
                 "IR camera", "fail",
-                "camera.device is 'auto' but no infrared camera was recognised",
+                "camera.device is 'auto' but no infrared camera was recognized",
                 hint=(
                     f"run  {PROG} cameras  to see this machine's devices; if the laptop "
                     f"has an IR camera, run  {PROG} hardware-report  and open a hardware "
@@ -725,7 +725,7 @@ def check_enrollment(user: str, socket_path: str) -> Check:
         return Check(
             "Enrollment", "warn",
             f"no faces enrolled for {user}",
-            hint=f"enrol one with:  sudo {PROG} enroll --user {user}",
+            hint=f"enroll one with:  sudo {PROG} enroll --user {user}",
         )
 
     total = sum(int(f.get("samples", 0) or 0) for f in faces)
@@ -736,7 +736,7 @@ def check_enrollment(user: str, socket_path: str) -> Check:
     if total < 3:
         return Check(
             "Enrollment", "warn", detail,
-            hint="that is very few samples; re-enrol for more reliable matching",
+            hint="that is very few samples; re-enroll for more reliable matching",
         )
     return Check("Enrollment", "ok", detail)
 
@@ -792,7 +792,7 @@ def check_tpm() -> Check:
             "available, but the master key is a plain file",
             hint=(
                 "the key predates the TPM being usable; to bind it, clear and "
-                f"re-enrol:  sudo {PROG} clear && sudo {PROG} enroll"
+                f"re-enroll:  sudo {PROG} clear && sudo {PROG} enroll"
             ),
         )
-    return Check("TPM", "ok", f"available ({TPM_RM_DEVICE}); the key will be sealed on first enrolment")
+    return Check("TPM", "ok", f"available ({TPM_RM_DEVICE}); the key will be sealed on first enrollment")

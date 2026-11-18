@@ -72,17 +72,17 @@ def cmd_enroll(args: argparse.Namespace) -> int:
         raise _as_command_error(exc, args.socket) from exc
     except KeyboardInterrupt:
         # stream_request closes the socket on GeneratorExit, which tells the
-        # daemon to abandon the enrolment and release the camera.
+        # daemon to abandon the enrollment and release the camera.
         progress.finish()
         console.print()
-        console.warn("enrolment aborted; nothing was saved")
+        console.warn("enrollment aborted; nothing was saved")
         return EXIT_INTERRUPTED
     finally:
         progress.finish()
 
     if final is None:
         raise CommandError(
-            "the daemon closed the connection before finishing the enrolment",
+            "the daemon closed the connection before finishing the enrollment",
             hint="check  journalctl -u irisd -n 50",
             code=EXIT_UNAVAILABLE,
         )
@@ -100,9 +100,9 @@ def cmd_enroll(args: argparse.Namespace) -> int:
 
 
 def _enroll_json(args: argparse.Namespace, user: str, name: str) -> int:
-    """Relay the daemon's enrolment stream verbatim as newline-delimited JSON.
+    """Relay the daemon's enrollment stream verbatim as newline-delimited JSON.
 
-    The GTK front end drives enrolment through ``pkexec iris enroll --json`` and
+    The GTK front end drives enrollment through ``pkexec iris enroll --json`` and
     renders a progress ring from these lines, so each one is forwarded the
     moment it arrives.  Progress objects keep the daemon's own shape
     (``progress``/``hint`` plus whatever extras it adds) and exactly one final
@@ -127,13 +127,13 @@ def _enroll_json(args: argparse.Namespace, user: str, name: str) -> int:
         emit_json({"ok": False, "error": str(error)})
         return error.code
     except KeyboardInterrupt:
-        emit_json({"ok": False, "error": "enrolment aborted; nothing was saved"})
+        emit_json({"ok": False, "error": "enrollment aborted; nothing was saved"})
         return EXIT_INTERRUPTED
 
     if final is None:
         emit_json({
             "ok": False,
-            "error": "the daemon closed the connection before finishing the enrolment",
+            "error": "the daemon closed the connection before finishing the enrollment",
         })
         return EXIT_UNAVAILABLE
 
@@ -152,7 +152,7 @@ def _enroll_hint(message: Mapping[str, Any]) -> str:
         return f"run  {PROG} doctor  to check the infrared camera"
     if reason == protocol.REASON_SPOOF_SUSPECTED:
         return (
-            "the frames looked flat rather than three-dimensional; enrol a live "
+            "the frames looked flat rather than three-dimensional; enroll a live "
             "face, not a photograph or a screen"
         )
     if reason == protocol.REASON_TIMEOUT:
@@ -188,7 +188,7 @@ def cmd_list(args: argparse.Namespace) -> int:
 
     if not faces:
         console.print(f"No faces enrolled for {console.bold(user)}.")
-        console.note(f"Enrol one with:  sudo {PROG} enroll --user {user}")
+        console.note(f"Enroll one with:  sudo {PROG} enroll --user {user}")
         return EXIT_OK
 
     rows = [

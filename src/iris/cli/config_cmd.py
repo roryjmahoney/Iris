@@ -102,7 +102,7 @@ def _config_get(args: argparse.Namespace) -> int:
             if default is not None and value != default:
                 comment = console.dim(f"  # default {format_value(default)}")
             elif dotted not in _DESCRIPTIONS:
-                comment = console.dim("  # not a recognised setting")
+                comment = console.dim("  # not a recognized setting")
             console.print(f"{name} = {format_value(value)}{comment}")
         console.print()
     return EXIT_OK
@@ -235,7 +235,7 @@ def cmd_config_set_all(args: argparse.Namespace) -> int:
     ``iris config set KEY VALUE`` is the interactive spelling; this is the one
     the settings panel uses.  It exists because each privileged invocation costs
     the user one polkit prompt: a panel with four changed settings must be able
-    to apply all four with a single authorisation, and it cannot do that one key
+    to apply all four with a single authorization, and it cannot do that one key
     at a time.
 
     The document is a JSON object of the same shape as

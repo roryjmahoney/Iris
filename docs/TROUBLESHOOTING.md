@@ -37,7 +37,7 @@ disabling IR mode.
 - Sit approximately 40–70 cm from the display and face the camera.
 - Temporarily lower `recognition.detect_score` from 0.7 to 0.6 only to
   diagnose detection at distance.
-- Enrol a second appearance for material changes such as glasses:
+- Enroll a second appearance for material changes such as glasses:
   `sudo iris enroll glasses`.
 - Run `sudo iris test` and distinguish `no_face`, `no_match`, and
   `spoof_suspected`.
@@ -70,7 +70,7 @@ sudo /usr/sbin/irisd --log-level DEBUG
 
 This is expected for daemon operations run without elevation.
 `/run/irisd/socket` is `root:root 0600` inside a `0700` directory, and the
-daemon independently checks `SO_PEERCRED`. Use `sudo` for enrolment, template
+daemon independently checks `SO_PEERCRED`. Use `sudo` for enrollment, template
 management, and live authentication requests.
 
 ## The GNOME Shell extension is missing
@@ -130,7 +130,7 @@ authentication remains independent.
 
 The default policy locks face authentication after five failures within 60
 seconds. The counter is in memory; a successful authentication, fresh
-enrolment, or daemon restart clears it. The Iris lockout does not lock the
+enrollment, or daemon restart clears it. The Iris lockout does not lock the
 password path.
 
 Review the exact controls in [Configuration](CONFIGURATION.md) and the broader

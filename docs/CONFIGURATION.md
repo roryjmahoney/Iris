@@ -111,7 +111,7 @@ not.
 | `no_face` | No usable face was visible | `PAM_AUTH_ERR` |
 | `timeout` | The attempt exceeded its budget | `PAM_AUTH_ERR` |
 | `camera_error` | The configured camera could not be used | `PAM_AUTH_ERR` |
-| `not_enrolled` | No usable enrolment is available | `PAM_AUTHINFO_UNAVAIL` |
+| `not_enrolled` | No usable enrollment is available | `PAM_AUTHINFO_UNAVAIL` |
 | `disabled` | Face authentication is switched off | `PAM_AUTHINFO_UNAVAIL` |
 | `lockout` | The per-user failure limit was reached | `PAM_AUTH_ERR` |
 | `spoof_suspected` | IR liveness checks rejected the image | `PAM_AUTH_ERR` |
@@ -119,4 +119,4 @@ not.
 Specific liveness failures are intentionally collapsed to
 `spoof_suspected` on authentication responses so they do not become an
 attacker-tuning signal. Detailed reasons are available in debug logs and as
-positioning guidance during enrolment.
+positioning guidance during enrollment.

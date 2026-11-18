@@ -20,7 +20,7 @@ from iris.cli.status import cmd_keyring, cmd_status
 
 _EPILOG = f"""\
 examples:
-  sudo {PROG} enroll                     enrol your face as "default"
+  sudo {PROG} enroll                     enroll your face as "default"
   sudo {PROG} enroll glasses             add a second look
   sudo {PROG} list                       show what is enrolled
   sudo {PROG} test                       run one real authentication, timed
@@ -47,7 +47,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--color", choices=("auto", "always", "never"), default="auto",
-        help="colourise output (default: auto, i.e. only on a terminal)",
+        help="colorize output (default: auto, i.e. only on a terminal)",
     )
     parser.add_argument(
         "--socket", default=protocol.SOCKET_PATH, metavar="PATH",
@@ -75,10 +75,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--name", dest="name_opt", metavar="NAME",
         help="same as the positional argument, for scripted callers",
     )
-    enroll.add_argument("--user", help="account to enrol (default: the invoking user)")
+    enroll.add_argument("--user", help="account to enroll (default: the invoking user)")
     enroll.add_argument(
         "--timeout", type=float, default=ENROLL_TIMEOUT, metavar="SECONDS",
-        help="budget for the whole enrolment (default: %(default)s)",
+        help="budget for the whole enrollment (default: %(default)s)",
     )
     enroll.add_argument(
         "--json", action="store_true",
@@ -212,7 +212,7 @@ def build_parser() -> argparse.ArgumentParser:
             "for anything wrong. Exits non-zero if any check fails."
         ),
     )
-    doctor.add_argument("--user", help="account whose enrolment to check")
+    doctor.add_argument("--user", help="account whose enrollment to check")
     doctor.add_argument(
         "--no-camera", action="store_true",
         help="skip the camera and strobe checks (they take a couple of seconds)",
@@ -244,10 +244,10 @@ def build_parser() -> argparse.ArgumentParser:
     keyring_parser.set_defaults(func=cmd_keyring)
 
     status = subparsers.add_parser(
-        "status", help="summarise the current state",
-        description="One-screen summary of the daemon, configuration and enrolment.",
+        "status", help="summarize the current state",
+        description="One-screen summary of the daemon, configuration and enrollment.",
     )
-    status.add_argument("--user", help="account to summarise (default: the invoking user)")
+    status.add_argument("--user", help="account to summarize (default: the invoking user)")
     status.add_argument("--json", action="store_true", help="machine-readable output")
     status.set_defaults(func=cmd_status)
 

@@ -9,7 +9,7 @@ overriding design rule here is:
 :func:`load_config` therefore never raises.  Anything it cannot parse,
 type-check or make sense of falls back to the corresponding value in
 :data:`DEFAULTS` and is reported through the ``iris.config`` logger.  A user
-who fat-fingers a TOML edit gets default face-auth behaviour and a log line,
+who fat-fingers a TOML edit gets default face-auth behavior and a log line,
 not a machine they cannot log into.
 
 Reading uses :mod:`tomllib` from the standard library.  Writing uses the small
@@ -122,7 +122,7 @@ def load_config(path: str | os.PathLike[str] = CONFIG_PATH) -> dict[str, Any]:
             return cfg
 
         _merge_into(cfg, loaded, str(path))
-        _sanitise(cfg, str(path))
+        _sanitize(cfg, str(path))
         return cfg
 
     except Exception:  # noqa: BLE001 - last-resort backstop, see docstring
@@ -150,7 +150,7 @@ def save_config(cfg: Mapping[str, Any], path: str | os.PathLike[str] = CONFIG_PA
 
     merged = defaults()
     _merge_into(merged, cfg, target)
-    _sanitise(merged, target)
+    _sanitize(merged, target)
     text = _emit_toml(merged)
 
     os.makedirs(directory, mode=0o755, exist_ok=True)
@@ -224,7 +224,7 @@ def _merge_into(base: dict[str, Any], loaded: Mapping[str, Any], origin: str) ->
                     continue
                 target[key] = coerced
             elif isinstance(value, _SCALAR_TYPES):
-                _LOG.debug("%s: keeping unrecognised key %s.%s", origin, section, key)
+                _LOG.debug("%s: keeping unrecognized key %s.%s", origin, section, key)
                 target[key] = value
             else:
                 _LOG.warning(
@@ -266,7 +266,7 @@ def _coerce(default: Any, value: Any) -> tuple[bool, Any]:
     return (False, default)  # pragma: no cover - DEFAULTS holds no other types
 
 
-def _sanitise(cfg: dict[str, Any], origin: str) -> None:
+def _sanitize(cfg: dict[str, Any], origin: str) -> None:
     """Clamp accepted-but-nonsensical values in place.
 
     Type correctness is not enough: ``timeout = -1`` and ``max_frames = 0``
@@ -354,7 +354,7 @@ def _emit_toml(cfg: Mapping[str, Any]) -> str:
     """Render *cfg* as TOML text.
 
     Known sections and keys are emitted in :data:`DEFAULTS` order so that diffs
-    between two saved files stay readable; anything unrecognised follows, in
+    between two saved files stay readable; anything unrecognized follows, in
     sorted order.
     """
     from . import __version__

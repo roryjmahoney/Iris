@@ -17,19 +17,19 @@ Input contract
 Frames come from :mod:`iris.camera`, which yields **2-D uint8 grayscale**
 images from the IR sensor (``/dev/video2`` is GREY 8-bit 640x360 only) and has
 already dropped the dark half of the emitter's strobe cycle. Two conversions
-happen here, on every frame, for both enrolment and authentication:
+happen here, on every frame, for both enrollment and authentication:
 
-1. **CLAHE** (contrast-limited adaptive histogram equalisation). The IR emitter
+1. **CLAHE** (contrast-limited adaptive histogram equalization). The IR emitter
    is a point source next to the lens, so illumination falls off sharply from
-   the centre of the frame and the overall level swings with how far the user
+   the center of the frame and the overall level swings with how far the user
    is sitting from the laptop. A global brightness shift moves an SFace
    embedding just as much as a change of identity does, which is how a system
    like this ends up "working at night but not in the morning". CLAHE
-   normalises *local* contrast, so a face enrolled at 40cm in a bright room and
+   normalizes *local* contrast, so a face enrolled at 40cm in a bright room and
    the same face at 70cm in the dark land in the same region of embedding
-   space. It is applied inside this module precisely so that enrolment and
+   space. It is applied inside this module precisely so that enrollment and
    authentication can never disagree about the preprocessing.
-2. **GRAY -> BGR**. Both networks were trained on 3-channel colour input and
+2. **GRAY -> BGR**. Both networks were trained on 3-channel color input and
    their input blobs are 3-channel; OpenCV will not accept a single-channel
    Mat. Replicating the gray plane three times is the standard adaptation and
    is what the OpenCV Zoo IR examples do.
@@ -94,7 +94,7 @@ class FaceEngine:
     the daemon holds a single engine for the lifetime of the service.
 
     Not thread-safe: ``cv2.FaceDetectorYN``/``FaceRecognizerSF`` hold mutable
-    internal state (notably the detector's input size), so serialise calls or
+    internal state (notably the detector's input size), so serialize calls or
     give each thread its own engine.
     """
 
@@ -135,7 +135,7 @@ class FaceEngine:
             self._recognizer = cv2.FaceRecognizerSF.create(str(recognizer_path), "")
         except cv2.error as exc:  # corrupt/truncated model, unsupported opset...
             raise EngineError(
-                f"failed to initialise recognition models from {model_dir}: {exc}"
+                f"failed to initialize recognition models from {model_dir}: {exc}"
             ) from exc
 
         # One CLAHE object, reused: creating it per frame is wasteful and the
@@ -161,7 +161,7 @@ class FaceEngine:
         """Return the directory that actually holds both ONNX files.
 
         The configured directory (``/usr/share/iris/models`` once installed)
-        always wins. A fallback to the source checkout lets the enrolment GUI
+        always wins. A fallback to the source checkout lets the enrollment GUI
         and the test suite run before ``install.sh`` has copied anything into
         /usr/share.
 
@@ -169,7 +169,7 @@ class FaceEngine:
         and the checkout lives in a user-writable home directory, so allowing it
         there would mean that a broken or partial install silently causes a root
         process to load an ONNX graph an unprivileged user can rewrite -- both a
-        parser attack surface and a way to swap in a recogniser that matches any
+        parser attack surface and a way to swap in a recognizer that matches any
         face. Root gets the configured path or a hard failure.
         """
         primary = Path(configured)
@@ -201,11 +201,11 @@ class FaceEngine:
     # preprocessing
     # ------------------------------------------------------------------
     def _prepare(self, gray: np.ndarray) -> np.ndarray:
-        """Grayscale IR frame -> CLAHE-equalised 3-channel BGR the nets accept.
+        """Grayscale IR frame -> CLAHE-equalized 3-channel BGR the nets accept.
 
         Both :meth:`detect` and :meth:`embed` funnel through here so a face row
         produced by the detector always indexes the exact same pixels the
-        recogniser will crop.
+        recognizer will crop.
         """
         if gray is None:
             raise ValueError("frame is None")
@@ -230,15 +230,15 @@ class FaceEngine:
             # The IR node is GREY 8-bit, so this only fires if a caller hands us
             # a float/16-bit buffer. Clip rather than rescale: rescaling would
             # make the absolute brightness of the frame depend on its own
-            # content, which breaks comparability between enrolment and auth.
+            # content, which breaks comparability between enrollment and auth.
             _log.debug("frame dtype %s coerced to uint8", arr.dtype)
             arr = np.clip(arr, 0, 255).astype(np.uint8)
 
         # OpenCV needs a contiguous buffer; slices of a larger capture buffer
         # (e.g. a cropped preview) are not.
         arr = np.ascontiguousarray(arr)
-        equalised = self._clahe.apply(arr)
-        return cv2.cvtColor(equalised, cv2.COLOR_GRAY2BGR)
+        equalized = self._clahe.apply(arr)
+        return cv2.cvtColor(equalized, cv2.COLOR_GRAY2BGR)
 
     # ------------------------------------------------------------------
     # detection
@@ -351,13 +351,13 @@ class FaceEngine:
     def compare(a: np.ndarray, b: np.ndarray) -> float:
         """Cosine similarity of two embeddings, in [-1, 1]; higher is closer.
 
-        This is a manual normalised dot product rather than
+        This is a manual normalized dot product rather than
         ``FaceRecognizerSF.match(..., FR_COSINE)``. The two are the same
         arithmetic -- verified against OpenCV on this machine over 200 random
         pairs, worst-case disagreement 1.4e-8, i.e. float32 round-off and eight
         orders of magnitude below the 0.363 decision threshold -- but the manual
         form is a true ``@staticmethod`` as the contract
-        requires, works on embeddings deserialised from the template store
+        requires, works on embeddings deserialized from the template store
         without a loaded 40MB model, and never raises on shape quirks the way
         the OpenCV wrapper does.
 

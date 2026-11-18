@@ -1,4 +1,4 @@
-"""Terminal output: colour, glyph fallbacks and the shared console."""
+"""Terminal output: color, glyph fallbacks and the shared console."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ class Console:
     """Stdout/stderr writer that knows what the terminal can render.
 
     Two independent capabilities are probed, because they fail independently:
-    ANSI colour (a TTY that is not ``dumb``, with ``NO_COLOR`` honoured) and
+    ANSI color (a TTY that is not ``dumb``, with ``NO_COLOR`` honored) and
     non-ASCII glyphs (whether the stream's encoding can represent them —
     ``LC_ALL=C`` gives ASCII-only, and writing ``✓`` there raises).
     """
@@ -54,7 +54,7 @@ class Console:
         elif when == "never":
             self.color = False
         else:
-            # https://no-color.org: any value, including empty, disables colour.
+            # https://no-color.org: any value, including empty, disables color.
             self.color = (
                 self.tty
                 and "NO_COLOR" not in os.environ
@@ -62,7 +62,7 @@ class Console:
             )
         self.unicode = _encodable(self.stream, "✓✗█░→·") and _encodable(self.err, "✓✗█░→·")
         if not self.unicode:
-            # Last line of defence: transliteration below handles the characters
+            # Last line of defense: transliteration below handles the characters
             # we know about, but a stray glyph in third-party text must degrade
             # to "?" rather than aborting the command mid-sentence.
             for stream in (self.stream, self.err):
@@ -159,7 +159,7 @@ class Console:
 
         Padding is applied to the *unpainted* glyph: ANSI escapes have zero
         display width but plenty of string length, so ``str.ljust`` on the
-        coloured text would shove every column out of alignment.
+        colored text would shove every column out of alignment.
         """
         glyphs = self._UNICODE_GLYPHS if self.unicode else self._ASCII_GLYPHS
         pad = " " * (self.status_width - len(glyphs[status]))

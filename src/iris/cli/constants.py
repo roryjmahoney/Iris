@@ -41,7 +41,7 @@ SEALED_KEY = "master.key.tpm.priv"
 TPM_DEVICE = "/dev/tpm0"
 TPM_RM_DEVICE = "/dev/tpmrm0"
 
-#: Default budget for the whole enrolment exchange.  Enrolment asks the user to
+#: Default budget for the whole enrollment exchange.  Enrollment asks the user to
 #: move their head through several poses, so it is a much longer conversation
 #: than an authentication; the daemon finishes long before this fires.
 ENROLL_TIMEOUT = 180.0

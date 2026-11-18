@@ -40,13 +40,13 @@ attempts; these measurements do not quantify its security benefit.
 Within this single session, the lowest same-person similarity was `0.621` and
 p5 was `0.738`. Those observations describe frames captured seconds apart;
 they do not establish a minimum score for later authentication attempts.
-The post-enrolment measurements below include a legitimate attempt at `0.371`.
+The post-enrollment measurements below include a legitimate attempt at `0.371`.
 
 Iris ships `recognition.threshold = 0.363`, as specified in `SPEC.md` and
 `iris.config.DEFAULTS`. Retain that default unless you deliberately choose to
 experiment with a stricter cutoff and evaluate the resulting retries.
 
-- `0.363` — shipped default; below all seven recorded post-enrolment scores.
+- `0.363` — shipped default; below all seven recorded post-enrollment scores.
 - `0.500` — a stricter optional cutoff; above one of those seven scores.
 - `0.600` — stricter still; also above that same recorded score. The small
   sample cannot predict how often future attempts would be rejected.
@@ -63,12 +63,12 @@ its security contribution with threshold changes.
 
 ---
 
-## Post-enrolment measurements
+## Post-enrollment measurements
 
 The study above compares frames captured *seconds apart in one session*, which is
-an optimistic sample of matching conditions. The number that governs day-to-day behaviour is a live
+an optimistic sample of matching conditions. The number that governs day-to-day behavior is a live
 frame compared against **templates enrolled in an earlier session** — different
-pose, different lighting, different hair. Measured after real enrolment
+pose, different lighting, different hair. Measured after real enrollment
 (15 samples, `primary`), seven consecutive `iris test` runs:
 
 | Run | Confidence | Elapsed |

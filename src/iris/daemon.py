@@ -17,7 +17,7 @@ Three reasons, all of them practical:
 2. **Privilege separation.**  Templates live in ``/var/lib/iris`` (0700 root)
    and the master key is TPM-sealed.  Exactly one root process needs that
    access; the GUI does not.
-3. **Serialising the camera.**  ``/dev/video2`` is a single-open device with a
+3. **Serializing the camera.**  ``/dev/video2`` is a single-open device with a
    strobing emitter.  Two processes fighting over it produce read errors and
    half-lit frames, so every capture in the system funnels through the single
    :attr:`IrisDaemon._camera_lock` here and concurrent requests queue.
@@ -105,7 +105,7 @@ SOCKET_MODE: Final[int] = 0o600
 LISTEN_BACKLOG: Final[int] = 8
 
 #: Concurrent client connections.  Handlers are one thread each; the camera is
-#: serialised anyway, so this only bounds bookkeeping and rejects a local
+#: serialized anyway, so this only bounds bookkeeping and rejects a local
 #: fork-bomb-style client early.
 MAX_CONNECTIONS: Final[int] = 16
 
@@ -125,13 +125,13 @@ MIN_CAPTURE_SECONDS: Final[float] = 0.5
 #: How long ``enroll`` waits for the camera if an authentication holds it.
 ENROLL_LOCK_TIMEOUT: Final[float] = 15.0
 
-# -- enrolment shape -------------------------------------------------------- #
+# -- enrollment shape -------------------------------------------------------- #
 
 #: Guided capture sequence.  Multiple poses matter more than more frames of one
 #: pose: SFace is not pose-invariant, and a template built only from a
-#: dead-centre stare rejects the same user the moment they lean on one elbow.
+#: dead-center stare rejects the same user the moment they lean on one elbow.
 ENROLL_POSES: Final[tuple[tuple[str, str], ...]] = (
-    ("centre", "Look straight at the camera"),
+    ("center", "Look straight at the camera"),
     ("left", "Turn your head slightly to your left"),
     ("right", "Turn your head slightly to your right"),
     ("up", "Tilt your chin slightly up"),
@@ -140,7 +140,7 @@ ENROLL_POSES: Final[tuple[tuple[str, str], ...]] = (
 ENROLL_SAMPLES_PER_POSE: Final[int] = 3
 ENROLL_TARGET_SAMPLES: Final[int] = len(ENROLL_POSES) * ENROLL_SAMPLES_PER_POSE
 
-#: Enrolment succeeds with fewer samples than the target as long as the centre
+#: Enrollment succeeds with fewer samples than the target as long as the center
 #: pose was captured and this many samples exist overall — a user who cannot
 #: hold a chin-down pose still gets a usable template rather than an error.
 ENROLL_MIN_SAMPLES: Final[int] = 6
@@ -159,10 +159,10 @@ ENROLL_SAMPLE_INTERVAL: Final[float] = 0.25
 #: 7 identical progress messages a second.
 ENROLL_HINT_INTERVAL: Final[float] = 0.7
 
-#: Cosine floor for "this is still the same person" during enrolment.  Far
+#: Cosine floor for "this is still the same person" during enrollment.  Far
 #: below the recognition threshold on purpose: a genuine profile shot can sit
 #: well under it, while impostor pairs cluster near 0.0-0.2.  This only has to
-#: catch a second person stepping into frame mid-enrolment, which would
+#: catch a second person stepping into frame mid-enrollment, which would
 #: otherwise silently add their face to the user's template.
 ENROLL_IDENTITY_FLOOR: Final[float] = 0.25
 
@@ -175,13 +175,13 @@ _GEOMETRIC_LIVENESS_REASONS: Final[frozenset[str]] = frozenset({
     "no_face", "face_too_small", "out_of_frame",
 })
 
-#: User-facing guidance per liveness reason, for enrolment progress lines.
+#: User-facing guidance per liveness reason, for enrollment progress lines.
 #: Authentication deliberately does *not* return these: telling an attacker
 #: which test they tripped hands them a tuning signal.
 _LIVENESS_HINTS: Final[dict[str, str]] = {
     "no_face": "No face detected — move into view of the camera",
     "face_too_small": "Move a little closer to the camera",
-    "out_of_frame": "Centre your face in the frame",
+    "out_of_frame": "Center your face in the frame",
     "dark_frame": "The infrared emitter is not lighting the scene",
     "no_ir_return": "Look directly at the camera — a photo or screen will not work",
     "saturated": "Too much glare — move back slightly",
@@ -330,7 +330,7 @@ class AuthOutcome:
 
 @dataclass(slots=True)
 class _CaptureCounters:
-    """Per-attempt frame bookkeeping shared by auth and enrolment."""
+    """Per-attempt frame bookkeeping shared by auth and enrollment."""
 
     lit_frames: int = 0
     face_frames: int = 0
@@ -802,7 +802,7 @@ class IrisDaemon:
 
         ``SO_PEERCRED`` is filled in by the kernel at ``connect()`` time and
         cannot be forged by the client, which is what makes it a usable
-        authorisation check rather than a hint.
+        authorization check rather than a hint.
         """
         try:
             raw = conn.getsockopt(
@@ -814,7 +814,7 @@ class IrisDaemon:
         return PeerCredentials(pid=pid, uid=uid, gid=gid)
 
     def _dispatch(self, request: dict[str, Any], conn: socket.socket) -> dict[str, Any]:
-        """Route one request to its handler and normalise every failure."""
+        """Route one request to its handler and normalize every failure."""
         op = request.get("op")
         if not isinstance(op, str) or op not in protocol.OPS:
             log.warning("unknown op %r", op)
@@ -859,7 +859,7 @@ class IrisDaemon:
         """Extract and validate the ``user`` field.
 
         The username becomes a path component in :mod:`iris.store`, so it is
-        validated here as well as there: defence in depth against a traversal
+        validated here as well as there: defense in depth against a traversal
         bug being one refactor away.
         """
         user = request.get("user")
@@ -935,7 +935,7 @@ class IrisDaemon:
         """Return the shared engine, (re)building it only when settings changed.
 
         Must be called with :attr:`_camera_lock` held — the engine is not
-        thread-safe, and that lock is what serialises its use.
+        thread-safe, and that lock is what serializes its use.
 
         :raises EngineError: the models cannot be loaded.
         """
@@ -980,12 +980,12 @@ class IrisDaemon:
         cryptographic state — so this is a no-op on a fresh install.
         """
         if not (self._keys.key_path.exists() or self._keys.sealed_priv_path.exists()):
-            log.info("no master key yet; it will be created on first enrolment")
+            log.info("no master key yet; it will be created on first enrollment")
             return
         try:
             self._keys.load_key()
         except (StoreError, OSError) as exc:
-            # Not fatal: `iris clear` + re-enrolment is the fix, and the daemon
+            # Not fatal: `iris clear` + re-enrollment is the fix, and the daemon
             # must stay up to serve that.
             log.error("master key unavailable: %s", exc)
             return
@@ -1167,7 +1167,7 @@ class IrisDaemon:
             # A tamper-detected or undecryptable store is NOT "no templates":
             # reporting it as such would hide an attack. There is no dedicated
             # reason code for it in the closed vocabulary, so use not_enrolled
-            # (the remedy — re-enrol — is the same) and shout in the log.
+            # (the remedy — re-enroll — is the same) and shout in the log.
             log.error("auth user=%s: template store unusable: %s", user, exc)
             response = protocol.auth_response(False, 0.0, protocol.REASON_NOT_ENROLLED)
             response["error"] = str(exc)
@@ -1290,7 +1290,7 @@ class IrisDaemon:
 
         The decision rule is ``required_matches`` *consecutive* frames that all
         clear the recognition threshold and the liveness checks.  This is the
-        central defence against a single lucky frame: motion blur, a passing
+        central defense against a single lucky frame: motion blur, a passing
         reflection or an unlucky embedding can produce one frame above
         threshold, but not three in a row.  At 15 fps with half the frames dark,
         three consecutive matches costs roughly 0.4 s.
@@ -1396,7 +1396,7 @@ class IrisDaemon:
         started = time.monotonic()
 
         def emit(progress: float, hint: str, **extra: Any) -> None:
-            """Send one progress line; a dead client aborts the enrolment.
+            """Send one progress line; a dead client aborts the enrollment.
 
             ``total`` rides on every line because the GTK front end renders
             "Sample 4 of 15" from the ``samples``/``total`` pair and has no
@@ -1450,8 +1450,8 @@ class IrisDaemon:
         finally:
             self._camera_lock.release()
 
-        centre_pose = ENROLL_POSES[0][0]
-        if len(samples) < ENROLL_MIN_SAMPLES or per_pose.get(centre_pose, 0) == 0:
+        center_pose = ENROLL_POSES[0][0]
+        if len(samples) < ENROLL_MIN_SAMPLES or per_pose.get(center_pose, 0) == 0:
             reason = _classify_failure(counters, progressed=bool(samples))
             log.warning(
                 "enroll user=%s name=%s failed: reason=%s samples=%d frames=%d faces=%d",
@@ -1475,7 +1475,7 @@ class IrisDaemon:
             log.error("enroll user=%s name=%s: cannot store templates: %s", user, name, exc)
             return {"ok": False, "error": str(exc)}
 
-        # A fresh enrolment invalidates whatever made the old one fail.
+        # A fresh enrollment invalidates whatever made the old one fail.
         self._failures.reset(user)
         log.info(
             "enroll user=%s name=%s stored samples=%d poses=%s elapsed=%.1fs",
@@ -1535,7 +1535,7 @@ class IrisDaemon:
 
         for gray in camera.frames(ENROLL_TOTAL_TIMEOUT):
             if self._stop.is_set():
-                log.warning("enrolment interrupted by shutdown")
+                log.warning("enrollment interrupted by shutdown")
                 break
 
             counters.lit_frames += 1
@@ -1591,7 +1591,7 @@ class IrisDaemon:
             try:
                 embedding = engine.embed(gray, row)
             except (EngineError, ValueError) as exc:
-                log.debug("enrolment frame rejected: %s", exc)
+                log.debug("enrollment frame rejected: %s", exc)
                 continue
 
             counters.embedded_frames += 1
@@ -1627,7 +1627,7 @@ class IrisDaemon:
 
 #: Failures that count towards the lockout.  Only outcomes where a face was
 #: actually presented and rejected: rate limiting exists to stop someone
-#: grinding photos or lookalikes against the recogniser.  An empty room
+#: grinding photos or lookalikes against the recognizer.  An empty room
 #: producing ``no_face``, or a camera that will not open, is not an attempt and
 #: must not lock the legitimate user out when they sit back down.
 _COUNTED_FAILURE_REASONS: Final[frozenset[str]] = frozenset({
